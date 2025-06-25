@@ -1,11 +1,12 @@
 {% extends "base.html" %}
-
 {% block title %}Home - Wardrobe{% endblock %}
 
 {% block content %}
-<div class="text-center">
-    <h1>Welcome to Wardrobe</h1>
-    <p class="lead">Discover your next favourite outfit.</p>
-    <a href="#" class="btn btn-primary">Shop Now</a>
-</div>
+<section class="hero">
+    <div class="hero-content text-center">
+        <h1 class="display-4">Find Your Style</h1>
+        <p class="lead">Curated collections for every season.</p>
+        <a href="{% url 'shop' %}" class="btn btn-light mt-3">Shop Now</a>
+    </div>
+</section>
 {% endblock %}
