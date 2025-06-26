@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-     'wardrobeapp',
+    'wardrobeapp',
+    'products',
 ]
 
 MIDDLEWARE = [
@@ -127,3 +128,6 @@ import os
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'wardrobeapp/static')
 ]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

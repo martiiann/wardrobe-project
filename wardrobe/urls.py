@@ -16,9 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+from wardrobeapp import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('wardrobeapp.urls')),
+    path('shop/', include('products.urls')),
+    path('shop/<str:gender>/<slug:category_slug>/', views.products_by_category, name='products_by_category'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

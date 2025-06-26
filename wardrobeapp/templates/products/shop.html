@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Shop - Wardrobe{% endblock %}
+
+{% block content %}
+<div class="shop-landing">
+    <div class="shop-half men">
+        <div class="overlay text-center text-white">
+            <h2>Men's Clothing</h2>
+            <a href="{% url 'mens_clothing' %}" class="btn btn-light mt-3">Shop Men's</a>
+        </div>
+    </div>
+    <div class="shop-half women">
+        <div class="overlay text-center text-white">
+            <h2>Women's Clothing</h2>
+            <a href="{% url 'womens_clothing' %}" class="btn btn-light mt-3">Shop Women's</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
