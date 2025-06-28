@@ -25,6 +25,7 @@ urlpatterns = [
     path('', include('wardrobeapp.urls')),
     path('shop/', include('products.urls')),
     path('shop/<str:gender>/<slug:category_slug>/', views.products_by_category, name='products_by_category'),
+    path('orders/', include('orders.urls')),
 ]
 
 if settings.DEBUG:
