@@ -123,3 +123,14 @@ body::before {
 .shop-half.women {
     background-image: url('https://images.unsplash.com/photo-1556905055-8f358a7a47b2');
 }
+
+main,
+.container,
+.card,
+form,
+section,
+.row {
+    position: relative;
+    z-index: 1;
+}
+
