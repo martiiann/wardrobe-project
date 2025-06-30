@@ -1,10 +1,22 @@
 {% extends "base.html" %}
-{% block title %}{{ category.name }} - {{ gender }}{% endblock %}
+{% block title %}{{ category.name }} - {{ gender|title }}{% endblock %}
 
 {% block content %}
 <div class="container py-5 text-white">
-    <h2 class="text-center mb-4">{{ category.name }} - {{ gender }}'s Collection</h2>
-    
+    <h2 class="text-center mb-4">{{ gender|title }}'s {{ category.name|title }}</h2>
+
+    <!-- Subcategory Filters -->
+    <div class="mb-4 text-center">
+        <strong>Filter by Category:</strong>
+        {% for cat in all_categories %}
+            {% if cat.gender == gender %}
+                <a href="{% url 'products_by_category' gender=cat.gender category_slug=cat.slug %}" class="btn btn-outline-light btn-sm mx-1 {% if cat.slug == category.slug %}active{% endif %}">
+                    {{ cat.name }}
+                </a>
+            {% endif %}
+        {% endfor %}
+    </div>
+
     {% if products %}
         <div class="row">
             {% for product in products %}
@@ -24,7 +36,7 @@
                                 </a>
                             </h5>
                             <p class="card-text">{{ product.description|truncatewords:15 }}</p>
-                            <p class="card-text fw-bold">${{ product.price }}</p>
+                            <p class="card-text fw-bold">€{{ product.price }}</p>
                         </div>
                     </div>
                 </div>

@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Product, Category
+from products.models import Product, Category
 from .forms import UserRegisterForm
 
 # Home Page
@@ -11,12 +11,17 @@ def home(request):
 
 # Shop Page
 def shop(request):
-    return render(request, 'products/shop.html')
+    categories = Category.objects.all()
+    products = Product.objects.filter(is_available=True).order_by('-created_at')
+    return render(request, 'products/shop.html', {
+        'products': products,
+        'categories': categories
+    })
 
 # Men's Clothing Page
 def mens_clothing(request):
-    categories = Category.objects.all()
-    products = Product.objects.filter(gender='Men', is_available=True)
+    categories = Category.objects.filter(gender='men')
+    products = Product.objects.filter(category__gender='men')
     return render(request, 'products/category_products.html', {
         'gender': 'Men',
         'categories': categories,
@@ -25,8 +30,8 @@ def mens_clothing(request):
 
 # Women's Clothing Page
 def womens_clothing(request):
-    categories = Category.objects.all()
-    products = Product.objects.filter(gender='Women', is_available=True)
+    categories = Category.objects.filter(gender='women')
+    products = Product.objects.filter(category__gender='women')
     return render(request, 'products/category_products.html', {
         'gender': 'Women',
         'categories': categories,
