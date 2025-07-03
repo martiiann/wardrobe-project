@@ -39,3 +39,7 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def get_current_price(self):
+        return self.price
+

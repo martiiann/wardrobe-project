@@ -2,8 +2,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from products.models import Product, Category
+from products.models import Product, Category, Size
 from .forms import UserRegisterForm
+from cart.cart import Cart
+
 
 # Home Page
 def home(request):
@@ -18,6 +20,19 @@ def shop(request):
         'categories': categories
     })
 
+
+def add_to_cart(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    cart = Cart(request)
+
+    size_id = request.POST.get('size')
+    size = get_object_or_404(Size, id=size_id) if size_id else None
+
+    quantity = int(request.POST.get('quantity', 1))
+
+    cart.add(product, size=size, quantity=quantity)
+    return redirect('cart:detail')
+    
 # Men's Clothing Page
 def mens_clothing(request):
     categories = Category.objects.filter(gender='men')

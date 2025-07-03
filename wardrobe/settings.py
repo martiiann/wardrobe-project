@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'wardrobeapp',
     'products',
     'orders',
+    'cart',
 ]
 
 MIDDLEWARE = [
@@ -57,13 +58,14 @@ ROOT_URLCONF = 'wardrobe.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'wardrobeapp/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'cart.context_processors.cart_context',
             ],
         },
     },
@@ -136,3 +138,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/profile/'  
 LOGOUT_REDIRECT_URL = '/'  # where to go after logout
+
+CART_SESSION_ID = 'cart'
