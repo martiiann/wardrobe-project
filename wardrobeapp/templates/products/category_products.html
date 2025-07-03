@@ -1,23 +1,43 @@
 {% extends "base.html" %}
-{% block title %}{{ category.name }} - Wardrobe{% endblock %}
+{% block title %}{{ gender }}'s Wardrobe{% endblock %}
 
 {% block content %}
 <div class="container py-5 text-white">
-    <h2 class="text-center mb-4">{{ category.name }} - {{ category.gender|title }}</h2>
+    <h2 class="text-center mb-4">{{ gender }}'s Collection{% if selected_category %}: {{ selected_category.name }}{% endif %}</h2>
+
+    <!-- Category Filter Bar -->
+    <div class="mb-4 text-center">
+        <a href="?{% if gender == 'Men' %}gender=men{% else %}gender=women{% endif %}" class="btn btn-outline-light {% if not selected_category %}active{% endif %} me-2">All</a>
+        {% for category in categories %}
+            <a href="?category={{ category.slug }}" class="btn btn-outline-light {% if selected_category and selected_category.slug == category.slug %}active{% endif %} me-2">
+                {{ category.name }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <!-- Product Cards -->
     <div class="row">
         {% for product in products %}
-            <div class="col-md-4 mb-4 text-center">
-                <div class="card bg-dark text-white">
-                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 bg-dark text-white">
+                    <a href="{% url 'product_detail' product.pk %}">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                        {% else %}
+                            <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="No image">
+                        {% endif %}
+                    </a>
                     <div class="card-body">
-                        <h5 class="card-title">{{ product.name }}</h5>
-                        <p class="card-text">{{ product.description|truncatewords:12 }}</p>
-                        <p class="card-text fw-bold">${{ product.price }}</p>
+                        <h5 class="card-title">
+                            <a href="{% url 'product_detail' product.pk %}" class="text-white text-decoration-none">
+                                {{ product.name }}
+                            </a>
+                        </h5>
+                        <p class="card-text">{{ product.description|truncatewords:15 }}</p>
+                        <p class="card-text fw-bold">€{{ product.price }}</p>
                     </div>
                 </div>
             </div>
-        {% empty %}
-            <p>No products in this category yet.</p>
         {% endfor %}
     </div>
 </div>

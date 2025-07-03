@@ -21,21 +21,39 @@ def shop(request):
 # Men's Clothing Page
 def mens_clothing(request):
     categories = Category.objects.filter(gender='men')
-    products = Product.objects.filter(category__gender='men')
+    selected_category_slug = request.GET.get('category')
+    products = Product.objects.filter(gender='men', is_available=True)
+
+    if selected_category_slug:
+        selected_category = get_object_or_404(Category, slug=selected_category_slug)
+        products = products.filter(category=selected_category)
+    else:
+        selected_category = None
+
     return render(request, 'products/category_products.html', {
         'gender': 'Men',
         'categories': categories,
-        'products': products
+        'products': products,
+        'selected_category': selected_category,
     })
 
 # Women's Clothing Page
 def womens_clothing(request):
     categories = Category.objects.filter(gender='women')
-    products = Product.objects.filter(category__gender='women')
+    selected_category_slug = request.GET.get('category')
+    products = Product.objects.filter(gender='women', is_available=True)
+
+    if selected_category_slug:
+        selected_category = get_object_or_404(Category, slug=selected_category_slug)
+        products = products.filter(category=selected_category)
+    else:
+        selected_category = None
+
     return render(request, 'products/category_products.html', {
         'gender': 'Women',
         'categories': categories,
-        'products': products
+        'products': products,
+        'selected_category': selected_category,
     })
 
 # Products by Category (Gender + Category)
