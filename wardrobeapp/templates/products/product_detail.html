@@ -22,7 +22,7 @@
             <p><strong>Available:</strong> {{ product.is_available|yesno:"Yes,No" }}</p>
 
             {% if product.is_available %}
-                <form method="post" action="{% url 'add_to_cart' product.id %}">
+                <form id="add-to-cart-form" data-url="{% url 'add_to_cart' product.id %}">
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="size" class="form-label">Select Size:</label>
@@ -32,6 +32,10 @@
                             {% endfor %}
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <label for="quantity" class="form-label">Quantity:</label>
+                        <input type="number" name="quantity" id="quantity" value="1" min="1" class="form-control" required>
+                    </div>
                     <button type="submit" class="btn btn-success">Add to Cart</button>
                 </form>
             {% else %}
@@ -40,4 +44,49 @@
         </div>
     </div>
 </div>
+
+<!-- Toast Notification -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+    <div id="cart-toast" class="toast align-items-center text-white bg-success border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body" id="cart-toast-message">
+                Product added to cart!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('add-to-cart-form');
+    const toastEl = document.getElementById('cart-toast');
+    const toastMessage = document.getElementById('cart-toast-message');
+    const toast = new bootstrap.Toast(toastEl);
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const url = form.dataset.url;
+        const formData = new FormData(form);
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+            },
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            toastMessage.textContent = 'Item added to cart!';
+            toast.show();
+        })
+        .catch(error => {
+            toastMessage.textContent = 'Failed to add item. Try again.';
+            toast.show();
+        });
+    });
+});
+</script>
 {% endblock %}

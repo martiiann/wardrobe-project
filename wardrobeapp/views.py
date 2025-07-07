@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -29,8 +30,16 @@ def add_to_cart(request, product_id):
     size = get_object_or_404(Size, id=size_id) if size_id else None
 
     quantity = int(request.POST.get('quantity', 1))
-
     cart.add(product, size=size, quantity=quantity)
+
+    # AJAX response if it's a JS call
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({
+            'message': f'"{product.name}" added to cart!',
+            'cart_total': f"{cart.get_total_price():.2f}"
+        })
+
+    # Default fallback: redirect to cart page
     return redirect('cart:detail')
     
 # Men's Clothing Page
