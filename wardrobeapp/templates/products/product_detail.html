@@ -103,17 +103,22 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('cart-alert-total').textContent = parseFloat(data.cart_total_price).toFixed(2);
             document.getElementById('cart-alert-items').textContent = data.cart_total_items;
 
-            // Show alert
+            // Show alert with animation
             alertBox.classList.remove('d-none');
-
+           // Give time for DOM to register before triggering animation
+           setTimeout(() => {
+               alertBox.classList.add('show');
+            }, 10);
             // Update cart icon count live
             const cartCountEl = document.getElementById('cart-count');
             if (cartCountEl) {
                 cartCountEl.textContent = data.cart_count;
             }
 
+            // Hide alert after 6 seconds with smooth transition
             setTimeout(() => {
-                alertBox.classList.add('d-none');
+                alertBox.classList.remove('show');
+                setTimeout(() => alertBox.classList.add('d-none'), 300);
             }, 6000);
         })
         .catch(error => {

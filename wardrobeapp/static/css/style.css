@@ -146,3 +146,16 @@ section,
     font-weight: 600;
     font-size: 14px;
 }
+
+#cart-alert {
+    transform: translateY(-20px);
+    opacity: 0;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+    pointer-events: none; /* Optional: prevents clicks while hidden */
+}
+
+#cart-alert.show {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
