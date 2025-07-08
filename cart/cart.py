@@ -96,3 +96,6 @@ class Cart:
     def get_product_quantity(self, product, size=None):
         key = self._generate_key(product.id, size)
         return self.cart.get(key, {}).get('quantity', 0)
+    
+    def count(self):
+        return sum(item.get('quantity', 0) for item in self.cart.values())

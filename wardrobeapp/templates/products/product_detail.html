@@ -22,7 +22,7 @@
             <p><strong>Available:</strong> {{ product.is_available|yesno:"Yes,No" }}</p>
 
             {% if product.is_available %}
-                <form id="add-to-cart-form" data-url="{% url 'add_to_cart' product.id %}">
+                <form id="add-to-cart-form" data-url="{% url 'add_to_cart' product.id %}" method="post">
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="size" class="form-label">Select Size:</label>
@@ -45,29 +45,43 @@
     </div>
 </div>
 
-<!-- Toast Notification -->
-<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
-    <div id="cart-toast" class="toast align-items-center text-white bg-success border-0" role="alert">
-        <div class="d-flex">
-            <div class="toast-body" id="cart-toast-message">
-                Product added to cart!
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+<!-- ✅ Custom Cart Alert Box -->
+<div id="cart-alert" class="position-fixed top-0 end-0 mt-5 me-3 p-3 bg-white shadow-lg border rounded d-none"
+     style="z-index: 1055; width: 360px;">
+    <div class="mb-2 text-success fw-bold">
+        ✅ <span id="cart-alert-success-msg">Item added to cart!</span>
+    </div>
+    <div class="d-flex align-items-start mb-2">
+        <img id="cart-alert-image" src="" class="me-3 rounded border" alt="product" width="70" height="70">
+        <div class="flex-grow-1">
+            <h6 id="cart-alert-name" class="mb-1 text-dark fw-bold">Product Name</h6>
+            <p class="mb-1 text-muted small">
+                Size: <span id="cart-alert-size">-</span><br>
+                Quantity: <span id="cart-alert-quantity">-</span><br>
+                Price: €<span id="cart-alert-price">-</span>
+            </p>
         </div>
+    </div>
+    <hr class="my-2">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <small><strong>Total: €<span id="cart-alert-total">-</span></strong></small><br>
+            <small>Items: <span id="cart-alert-items">-</span></small>
+        </div>
+        <a href="{% url 'cart:detail' %}" class="btn btn-dark btn-sm">Proceed to Checkout</a>
     </div>
 </div>
 
+<!-- ✅ JavaScript -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('add-to-cart-form');
-    const toastEl = document.getElementById('cart-toast');
-    const toastMessage = document.getElementById('cart-toast-message');
-    const toast = new bootstrap.Toast(toastEl);
+    const alertBox = document.getElementById('cart-alert');
 
     form.addEventListener('submit', function (e) {
         e.preventDefault();
-        const url = form.dataset.url;
         const formData = new FormData(form);
+        const url = form.dataset.url;
 
         fetch(url, {
             method: 'POST',
@@ -75,16 +89,35 @@ document.addEventListener('DOMContentLoaded', function () {
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
             },
-            body: formData
+            body: formData,
         })
-        .then(response => {
-            if (!response.ok) throw new Error('Network response was not ok');
-            toastMessage.textContent = 'Item added to cart!';
-            toast.show();
+        .then(response => response.json())
+        .then(data => {
+            // Populate alert box
+            document.getElementById('cart-alert-success-msg').textContent = `${data.name} added to cart!`;
+            document.getElementById('cart-alert-image').src = data.image || 'https://via.placeholder.com/70';
+            document.getElementById('cart-alert-name').textContent = data.name;
+            document.getElementById('cart-alert-price').textContent = parseFloat(data.price).toFixed(2);
+            document.getElementById('cart-alert-quantity').textContent = data.quantity;
+            document.getElementById('cart-alert-size').textContent = data.size || '-';
+            document.getElementById('cart-alert-total').textContent = parseFloat(data.cart_total_price).toFixed(2);
+            document.getElementById('cart-alert-items').textContent = data.cart_total_items;
+
+            // Show alert
+            alertBox.classList.remove('d-none');
+
+            // Update cart icon count live
+            const cartCountEl = document.getElementById('cart-count');
+            if (cartCountEl) {
+                cartCountEl.textContent = data.cart_count;
+            }
+
+            setTimeout(() => {
+                alertBox.classList.add('d-none');
+            }, 6000);
         })
         .catch(error => {
-            toastMessage.textContent = 'Failed to add item. Try again.';
-            toast.show();
+            console.error('Error:', error);
         });
     });
 });

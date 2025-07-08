@@ -134,3 +134,15 @@ section,
     z-index: 1;
 }
 
+#cart-alert-total,
+#cart-alert-items {
+    color: #212529;  /* Bootstrap default dark text */
+    font-weight: 600;
+    font-size: 14px;
+}
+
+#cart-alert small {
+    color: #212529 !important;  /* Override muted or white text */
+    font-weight: 600;
+    font-size: 14px;
+}

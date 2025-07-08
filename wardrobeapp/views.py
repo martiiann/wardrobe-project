@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from products.models import Product, Category, Size
 from .forms import UserRegisterForm
 from cart.cart import Cart
-
+from django.views.decorators.http import require_POST
 
 # Home Page
 def home(request):
@@ -22,24 +22,30 @@ def shop(request):
     })
 
 
+
+@require_POST
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     cart = Cart(request)
 
     size_id = request.POST.get('size')
+    quantity = int(request.POST.get('quantity', 1))
     size = get_object_or_404(Size, id=size_id) if size_id else None
 
-    quantity = int(request.POST.get('quantity', 1))
     cart.add(product, size=size, quantity=quantity)
 
-    # AJAX response if it's a JS call
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({
-            'message': f'"{product.name}" added to cart!',
-            'cart_total': f"{cart.get_total_price():.2f}"
+            'name': product.name,
+            'image': product.image.url if product.image else '',
+            'quantity': quantity,
+            'price': float(product.price),
+            'size': size.name if size else '',
+            'cart_count': cart.count(),
+            'cart_total_price': float(cart.get_total_price()),
+            'cart_total_items': len(cart),  # important!
         })
 
-    # Default fallback: redirect to cart page
     return redirect('cart:detail')
     
 # Men's Clothing Page
