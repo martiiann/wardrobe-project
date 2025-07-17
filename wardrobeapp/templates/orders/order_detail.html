@@ -3,18 +3,52 @@
 
 {% block content %}
 <div class="container py-5 text-white">
-    <h2>Order #{{ order.id }}</h2>
-    <p><strong>Placed:</strong> {{ order.created_at }}</p>
-    <p><strong>Status:</strong> {% if order.is_completed %}Completed{% else %}Pending{% endif %}</p>
-    <p><strong>Shipping Address:</strong> {{ order.full_name }}, {{ order.address }}, {{ order.city }}, {{ order.postal_code }}, {{ order.country }}</p>
+  <h2 class="mb-4">Order #{{ order.id }}</h2>
 
-    <h4 class="mt-4">Items</h4>
-    <ul class="list-group">
-        {% for item in order.items.all %}
-            <li class="list-group-item bg-dark text-white">
-                {{ item.product.name }} - Quantity: {{ item.quantity }}
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card bg-dark text-white mb-4">
+        <div class="card-header">Order Info</div>
+        <div class="card-body">
+          <p><strong>Placed on:</strong> {{ order.created_at }}</p>
+          <p><strong>Status:</strong>
+            {% if order.is_completed %}
+              <span class="text-success">Completed</span>
+            {% else %}
+              <span class="text-warning">Pending</span>
+            {% endif %}
+          </p>
+          <p><strong>Total Paid:</strong> ${{ order.total_paid }}</p>
+        </div>
+      </div>
+
+      <div class="card bg-dark text-white mb-4">
+        <div class="card-header">Shipping Details</div>
+        <div class="card-body">
+          <p><strong>Name:</strong> {{ order.full_name }}</p>
+          <p><strong>Address:</strong> {{ order.address }}</p>
+          <p><strong>City:</strong> {{ order.city }}</p>
+          <p><strong>Postal Code:</strong> {{ order.postal_code }}</p>
+          <p><strong>Country:</strong> {{ order.country }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card bg-dark text-white">
+        <div class="card-header">Order Items</div>
+        <ul class="list-group list-group-flush">
+          {% for item in order.items.all %}
+            <li class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
+              {{ item.product.name }}
+              <span>Qty: {{ item.quantity }}</span>
             </li>
-        {% endfor %}
-    </ul>
+          {% empty %}
+            <li class="list-group-item bg-dark text-white">No items in this order.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

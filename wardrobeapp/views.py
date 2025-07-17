@@ -4,9 +4,14 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from products.models import Product, Category, Size
-from .forms import UserRegisterForm
+from .forms import UserRegisterForm, UserUpdateForm  # Make sure you have this form
 from cart.cart import Cart
 from django.views.decorators.http import require_POST
+from orders.models import Order  # Assuming you have an Order model
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .forms import UserUpdateForm, ProfileUpdateForm
+from .models import Profile
 
 # Home Page
 def home(request):
@@ -20,8 +25,6 @@ def shop(request):
         'products': products,
         'categories': categories
     })
-
-
 
 @require_POST
 def add_to_cart(request, product_id):
@@ -43,11 +46,11 @@ def add_to_cart(request, product_id):
             'size': size.name if size else '',
             'cart_count': cart.count(),
             'cart_total_price': float(cart.get_total_price()),
-            'cart_total_items': len(cart),  # important!
+            'cart_total_items': len(cart),
         })
 
     return redirect('cart:detail')
-    
+
 # Men's Clothing Page
 def mens_clothing(request):
     categories = Category.objects.filter(gender='men')
@@ -101,7 +104,6 @@ def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
     return render(request, 'products/product_detail.html', {'product': product})
 
-
 # ---------------------------
 # Authentication Views Below
 # ---------------------------
@@ -127,6 +129,7 @@ def user_login(request):
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
+            messages.success(request, 'Successfully signed in!')
             return redirect('profile')
         else:
             messages.error(request, 'Invalid username or password')
@@ -135,9 +138,43 @@ def user_login(request):
 # Logout View
 def user_logout(request):
     logout(request)
+    messages.info(request, 'You have been logged out.')
     return redirect('login')
 
 # Profile View (Logged-in Users)
 @login_required
 def profile(request):
     return render(request, 'auth/profile.html')
+
+# Order History View
+@login_required
+def order_history(request):
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'auth/order_history.html', {'orders': orders})
+
+# Order Detail View
+@login_required
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, 'auth/order_detail.html', {'order': order})
+
+# Update Profile View
+@login_required
+def update_profile(request):
+    user_form = UserUpdateForm(instance=request.user)
+    profile_form = ProfileUpdateForm(instance=request.user.profile)
+
+    if request.method == 'POST':
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        profile_form = ProfileUpdateForm(request.POST, instance=request.user.profile)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile has been updated.')
+            return redirect('profile')
+
+    return render(request, 'auth/update_profile.html', {
+        'user_form': user_form,
+        'profile_form': profile_form
+    })

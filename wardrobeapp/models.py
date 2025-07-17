@@ -1,5 +1,11 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
+# -------------------------
+# Category Model
+# -------------------------
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True)
@@ -12,7 +18,9 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-
+# -------------------------
+# Product Model
+# -------------------------
 class Product(models.Model):
     GENDER_CHOICES = (
         ('Men', 'Men'),
@@ -20,7 +28,7 @@ class Product(models.Model):
     )
 
     name = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=100, unique=True)  
+    slug = models.SlugField(max_length=100, unique=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     description = models.TextField()
@@ -31,3 +39,28 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+# -------------------------
+# Profile Model
+# -------------------------
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    full_name = models.CharField(max_length=100, blank=True)
+    address = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    postal_code = models.CharField(max_length=20, blank=True)
+    country = models.CharField(max_length=100, blank=True)
+    payment_method = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s Profile"
+
+# -------------------------
+# Auto-create profile when user is created
+# -------------------------
+@receiver(post_save, sender=User)
+def create_or_update_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+    else:
+        instance.profile.save()

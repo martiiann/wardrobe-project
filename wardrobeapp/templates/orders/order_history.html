@@ -3,19 +3,28 @@
 
 {% block content %}
 <div class="container py-5 text-white">
-    <h2 class="mb-4">My Orders</h2>
-    {% if orders %}
-        <ul class="list-group">
-            {% for order in orders %}
-                <li class="list-group-item bg-dark text-white">
-                    <a href="{% url 'order_detail' order.id %}" class="text-light">
-                        Order #{{ order.id }} - {{ order.created_at|date:"Y-m-d H:i" }} - {% if order.is_completed %}Completed{% else %}Pending{% endif %}
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>You haven't placed any orders yet.</p>
-    {% endif %}
+  <h2 class="mb-4">My Orders</h2>
+
+  {% if orders %}
+    <ul class="list-group">
+      {% for order in orders %}
+        <li class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
+          <div>
+            <strong>Order #{{ order.id }}</strong><br>
+            Placed: {{ order.created_at|date:"Y-m-d H:i" }}<br>
+            Status:
+            {% if order.is_completed %}
+              <span class="text-success">Completed</span>
+            {% else %}
+              <span class="text-warning">Pending</span>
+            {% endif %}
+          </div>
+          <a href="{% url 'order_detail' order.id %}" class="btn btn-outline-light btn-sm">View Details</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="alert alert-info mt-3">You haven't placed any orders yet.</div>
+  {% endif %}
 </div>
 {% endblock %}

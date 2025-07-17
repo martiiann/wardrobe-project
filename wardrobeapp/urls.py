@@ -11,15 +11,18 @@ urlpatterns = [
     path('product/<int:pk>/', views.product_detail, name='product_detail'),
 
     path('register/', views.register, name='register'),
-    path('login/', auth_views.LoginView.as_view(template_name='auth/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+
+    # ✅ Override login/logout to use custom views (for flash messages)
+    path('login/', views.user_login, name='login'),
+    path('logout/', views.user_logout, name='logout'),
+
     path('profile/', views.profile, name='profile'),
+    path('profile/edit/', views.update_profile, name='edit_profile'),
+    path('my-orders/', views.order_history, name='my_orders'), 
 
     path('add-to-cart/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
 
-    # ✅ Use namespace for cart
+    # Namespaced routes
     path('cart/', include(('cart.urls', 'cart'), namespace='cart')),
-
-    # ✅ Register the products app with a namespace
     path('products/', include(('products.urls', 'products'), namespace='products')),
 ]
