@@ -84,8 +84,7 @@
                     <span>{{ cart|length }}</span>
                 </div>
 
-                <!-- Disabled Checkout Placeholder -->
-                <a href="#" class="btn btn-success btn-lg w-100 disabled">Checkout (Coming Soon)</a>
+                <a href="{% url 'checkout' %}" class="btn btn-success btn-lg w-100">Proceed to Checkout</a>
 
                 <!-- Continue Shopping -->
                 <a href="{% url 'products:product_list' %}" class="btn btn-outline-light mt-2 w-100">
