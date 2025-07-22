@@ -67,6 +67,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'cart.context_processors.cart_context',
+                'wardrobeapp.context_processors.stripe_public_key',
             ],
         },
     },
@@ -132,6 +133,12 @@ import os
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'wardrobeapp/static')
 ]
+
+# Stripe Keys
+from decouple import config
+
+STRIPE_PUBLIC_KEY = config("STRIPE_PUBLIC_KEY")
+STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY")
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

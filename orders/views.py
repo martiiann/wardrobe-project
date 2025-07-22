@@ -1,3 +1,7 @@
+import stripe
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -59,3 +63,43 @@ def checkout(request):
         form = CheckoutForm(initial=initial_data)
 
     return render(request, 'orders/checkout.html', {'form': form})
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+@login_required
+@csrf_exempt
+def create_checkout_session(request):
+    cart = Cart(request)
+
+    if not cart:
+        return JsonResponse({'error': 'Cart is empty'}, status=400)
+
+    line_items = []
+    for item in cart:
+        line_items.append({
+            'price_data': {
+                'currency': 'usd',
+                'product_data': {
+                    'name': item['product'].name,
+                },
+                'unit_amount': int(item['price'] * 100),  # Stripe uses cents
+            },
+            'quantity': item['quantity'],
+        })
+
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=line_items,
+        mode='payment',
+        success_url=request.build_absolute_uri('/orders/success/'),
+        cancel_url=request.build_absolute_uri('/cart/'),
+    )
+
+    return JsonResponse({'id': session.id})
+
+@login_required
+def success(request):
+    cart = Cart(request)
+    cart.clear()
+    messages.success(request, "Payment successful! Thank you for your order.")
+    return render(request, 'orders/success.html')

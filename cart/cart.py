@@ -97,5 +97,12 @@ class Cart:
         key = self._generate_key(product.id, size)
         return self.cart.get(key, {}).get('quantity', 0)
     
+    def clear(self):
+        """Clear the cart session."""
+        self.cart = {}
+        self.session[settings.CART_SESSION_ID] = self.cart
+        self.session.modified = True
+        cache.delete(f'cart_{self.session.session_key}')
+    
     def count(self):
         return sum(item.get('quantity', 0) for item in self.cart.values())
