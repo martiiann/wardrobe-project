@@ -34,3 +34,6 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+    # ✅ Custom 403 handler
+handler403 = 'wardrobeapp.views.custom_permission_denied_view'
+

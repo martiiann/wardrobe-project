@@ -159,3 +159,26 @@ section,
     opacity: 1;
     pointer-events: auto;
 }
+
+/* Make the account dropdown background match your dark theme */
+.dropdown-menu {
+  background-color: #212529 !important; /* Bootstrap dark bg */
+  border: 1px solid #343a40 !important;
+}
+
+/* Make the links inside the dropdown white */
+.dropdown-menu .dropdown-item {
+  color: #f8f9fa !important;
+}
+
+/* On hover, lighten the background slightly */
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus {
+  background-color: #343a40 !important;
+  color: #fff !important;
+}
+
+/* Divider color */
+.dropdown-divider {
+  border-top: 1px solid #343a40 !important;
+}
