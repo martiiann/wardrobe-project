@@ -32,28 +32,47 @@
 
 <script src="https://js.stripe.com/v3/"></script>
 <script>
-    const stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
+  const stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
 
-    document.getElementById("checkout-button").addEventListener("click", function () {
-        fetch("{% url 'create_checkout_session' %}", {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": "{{ csrf_token }}",
-                "Content-Type": "application/json"
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.id) {
-                return stripe.redirectToCheckout({ sessionId: data.id });
-            } else {
-                alert("Something went wrong.");
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-        });
+  document.getElementById("checkout-button").addEventListener("click", function () {
+    // Get form field values
+    const fullName = document.getElementById("id_full_name").value;
+    const email = document.getElementById("id_email").value;
+    const address = document.getElementById("id_address").value;
+    const city = document.getElementById("id_city").value;
+    const postalCode = document.getElementById("id_postal_code").value;
+    const country = document.getElementById("id_country").value;
+    const paymentMethod = document.getElementById("id_payment_method").value;
+
+    fetch("{% url 'create_checkout_session' %}", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        full_name: fullName,
+        email: email,
+        address: address,
+        city: city,
+        postal_code: postalCode,
+        country: country,
+        payment_method: paymentMethod
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.id) {
+        return stripe.redirectToCheckout({ sessionId: data.id });
+      } else {
+        alert("Something went wrong.");
+      }
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      alert("Something went wrong.");
     });
+  });
 </script>
 
 {% endblock %}

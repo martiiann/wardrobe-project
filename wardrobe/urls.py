@@ -19,6 +19,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from wardrobeapp import views
+from orders import views as order_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,6 +28,7 @@ urlpatterns = [
     path('shop/<str:gender>/<slug:category_slug>/', views.products_by_category, name='products_by_category'),
     path('orders/', include('orders.urls')),
     path('faq/', include(('faq.urls', 'faq'), namespace='faq')),
+    path('stripe/webhook/', order_views.stripe_webhook, name='stripe_webhook'),
 ]
 
 if settings.DEBUG:
