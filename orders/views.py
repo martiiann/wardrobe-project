@@ -12,6 +12,8 @@ from django.contrib.auth.decorators import login_required
 from .forms import CheckoutForm
 from .models import Order, OrderItem
 from cart.cart import Cart
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponseForbidden
 
 @login_required
 def order_history(request):
@@ -20,7 +22,11 @@ def order_history(request):
 
 @login_required
 def order_detail(request, order_id):
-    order = Order.objects.get(pk=order_id, user=request.user)
+    order = get_object_or_404(Order, id=order_id)
+
+    if order.user != request.user:
+        return HttpResponseForbidden("You do not have permission to view this order.")
+
     return render(request, 'orders/order_detail.html', {'order': order})
 
 @login_required
@@ -95,7 +101,7 @@ def create_checkout_session(request):
 
     for item in cart:
         size = item.get('size')
-        
+
         line_items.append({
             'price_data': {
                 'currency': 'usd',

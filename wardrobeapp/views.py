@@ -144,19 +144,22 @@ def user_logout(request):
 # Profile View (Logged-in Users)
 @login_required
 def profile(request):
-    return render(request, 'auth/profile.html')
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'auth/profile.html', {
+        'orders': orders
+    })
 
 # Order History View
 @login_required
 def order_history(request):
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'auth/order_history.html', {'orders': orders})
+    return render(request, 'orders/order_history.html', {'orders': orders})
 
 # Order Detail View
 @login_required
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
-    return render(request, 'auth/order_detail.html', {'order': order})
+    return render(request, 'orders/order_detail.html', {'order': order})
 
 # Update Profile View
 @login_required
@@ -178,3 +181,6 @@ def update_profile(request):
         'user_form': user_form,
         'profile_form': profile_form
     })
+
+def custom_permission_denied_view(request, exception=None):
+    return render(request, '403.html', status=403)
