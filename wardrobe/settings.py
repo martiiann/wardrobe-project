@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-j%m-=1(@4o$=ujuws3bw@quok&^!f%yee$b!w1nt+h63lf%0&h
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    'needed-lionfish-plainly.ngrok-free.app',
+]
 
 
 # Application definition
@@ -152,6 +156,9 @@ DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
 # Stripe Webhook Secret
 STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET")
 
+# Custom site URL for building absolute URLs
+SITE_URL = 'https://ef1u217f7da2.ngrok-free.app'
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -160,3 +167,8 @@ LOGIN_REDIRECT_URL = '/profile/'
 LOGOUT_REDIRECT_URL = '/'  # where to go after logout
 
 CART_SESSION_ID = 'cart'
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.stripe.com",
+    "https://*.ngrok-free.app",  # also allow your dev domain
+]
