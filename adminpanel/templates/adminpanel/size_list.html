@@ -1,0 +1,20 @@
+{% extends 'adminpanel/base.html' %}
+
+{% block content %}
+<h2>Sizes</h2>
+<a href="{% url 'adminpanel:size_add' %}" class="btn btn-success mb-3">➕ Add Size</a>
+<table class="table">
+  <thead><tr><th>Name</th><th>Actions</th></tr></thead>
+  <tbody>
+    {% for size in sizes %}
+    <tr>
+      <td>{{ size.name }}</td>
+      <td>
+        <a href="{% url 'adminpanel:size_edit' size.id %}" class="btn btn-sm btn-primary">Edit</a>
+        <a href="{% url 'adminpanel:size_delete' size.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this size?')">Delete</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
