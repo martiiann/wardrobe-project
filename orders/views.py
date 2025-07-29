@@ -217,7 +217,6 @@ def stripe_webhook(request):
             order_url = f"{site_url}/orders/{order.id}/"
 
             try:
-                # ✅ Customer: HTML email with fallback
                 html_message = render_to_string('orders/email_confirmation.html', {
                     'order': order,
                     'items': items,
@@ -244,7 +243,6 @@ You can view your order here: {order_url}
                 email.send()
                 print("📧 HTML email sent to:", order.email)
 
-                # ✅ Admin: plain text
                 admin_message = f"""New order #{order.id} from {user.email}
 Total: ${order.total_price:.2f}
 View: {order_url}
@@ -262,6 +260,9 @@ View: {order_url}
                 print("❌ Email sending failed:", e)
 
             return HttpResponse(status=200)
+
+    # ✅ Always return 200 for all other event types
+    return HttpResponse(status=200)
 
 @login_required
 def success(request):

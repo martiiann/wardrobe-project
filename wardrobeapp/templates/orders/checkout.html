@@ -44,7 +44,7 @@
     const country = document.getElementById("id_country").value;
     const paymentMethod = document.getElementById("id_payment_method").value;
 
-    fetch("{% url 'create_checkout_session' %}", {
+    fetch("{% url 'orders:create_checkout_session' %}", {
       method: "POST",
       headers: {
         "X-CSRFToken": "{{ csrf_token }}",

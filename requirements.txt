@@ -1,0 +1,9 @@
+Django>=4.2,<5.0
+stripe
+django-crispy-forms
+crispy-bootstrap5
+Pillow
+gunicorn
+whitenoise
+dj-database-url
+python-decouple
