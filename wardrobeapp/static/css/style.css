@@ -4,7 +4,7 @@ html, body {
     padding: 0;
     height: 100%;
     width: 100%;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif; /* ✅ Added Mac-friendly fonts */
     color: #fff;
     background: url('https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0') no-repeat center center fixed;
     background-size: cover;
@@ -16,14 +16,14 @@ body::before {
     content: '';
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5); /* Adjust opacity */
+    background: rgba(0, 0, 0, 0.5);
     z-index: 0;
 }
 
 /* Transparent & Blurred Navbar */
 .navbar {
-    background-color: rgba(0, 0, 0, 0.25); /* slightly lighter */
-    backdrop-filter: blur(10px);           /* strong frosted effect */
+    background-color: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     z-index: 1000;
@@ -39,7 +39,6 @@ body::before {
     color: #ddd !important;
     text-decoration: underline;
 }
-
 
 /* HERO Section */
 .hero {
@@ -86,7 +85,7 @@ body::before {
     background-color: #f1f1f1;
 }
 
-/* SHOP PAGE (unchanged) */
+/* SHOP PAGE */
 .shop-landing {
     height: 100vh;
     display: flex;
@@ -136,22 +135,34 @@ section,
 
 #cart-alert-total,
 #cart-alert-items {
-    color: #212529;  /* Bootstrap default dark text */
+    color: #c0c0c0 !important;  /* Bright green for totals */
     font-weight: 600;
     font-size: 14px;
 }
 
 #cart-alert small {
-    color: #212529 !important;  /* Override muted or white text */
-    font-weight: 600;
-    font-size: 14px;
+    color: #fff !important;  /* White text for small details */
+    font-weight: 500;
+    font-size: 13px;
 }
 
 #cart-alert {
+    background-color: rgba(0, 0, 0, 0.9) !important; /* Dark background */
+    color: #fff !important; /* White text */
+    border: 1px solid #c0c0c0 !important; 
+    border-radius: 10px;
     transform: translateY(-20px);
     opacity: 0;
     transition: transform 0.4s ease, opacity 0.4s ease;
-    pointer-events: none; /* Optional: prevents clicks while hidden */
+    pointer-events: none;
+}
+
+#cart-alert h6 {
+    color: #fff !important;
+}
+
+#cart-alert p {
+    color: rgba(255,255,255,0.8) !important;
 }
 
 #cart-alert.show {
@@ -160,25 +171,79 @@ section,
     pointer-events: auto;
 }
 
-/* Make the account dropdown background match your dark theme */
+/* Account dropdown */
 .dropdown-menu {
-  background-color: #212529 !important; /* Bootstrap dark bg */
+  background-color: #212529 !important;
   border: 1px solid #343a40 !important;
 }
 
-/* Make the links inside the dropdown white */
 .dropdown-menu .dropdown-item {
   color: #f8f9fa !important;
 }
 
-/* On hover, lighten the background slightly */
 .dropdown-menu .dropdown-item:hover,
 .dropdown-menu .dropdown-item:focus {
   background-color: #343a40 !important;
   color: #fff !important;
 }
 
-/* Divider color */
 .dropdown-divider {
   border-top: 1px solid #343a40 !important;
+}
+
+/* ✅ NEW STYLES FOR PRODUCT PAGE */
+
+/* Category buttons */
+.category-btn {
+    background: #222;
+    border-radius: 50px;
+    padding: 6px 16px;
+    margin: 4px;
+    color: #fff;
+    border: 1px solid #555;
+    transition: all 0.3s ease;
+}
+.category-btn:hover, .category-btn.active {
+    background: #ffcc00;
+    color: #000;
+    border-color: #ffcc00;
+}
+
+/* Search bar */
+.stylish-search {
+    background-color: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.stylish-search::placeholder {
+    color: rgba(255,255,255,0.7);
+}
+
+.stylish-search:focus {
+    background-color: rgba(255,255,255,0.2);
+    border-color: #fff;
+    outline: none;
+    box-shadow: 0 0 6px rgba(255,255,255,0.4);
+}
+
+/* Product cards */
+.stylish-card {
+    border: none;
+    border-radius: 12px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.stylish-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+/* Uniform product images */
+.stylish-img {
+    height: 300px;
+    object-fit: cover;
+    border-radius: 12px 12px 0 0;
 }

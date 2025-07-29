@@ -3,30 +3,42 @@
 
 {% block content %}
 <div class="container py-5 text-white">
-    <h2 class="text-center mb-4">{{ gender|title }}'s {{ category.name|title }}</h2>
 
-    <!-- Subcategory Filters -->
+    <!-- Page Title -->
+    <h2 class="text-center mb-4 stylish-heading">{{ gender|title }}'s {{ category.name|title }}</h2>
+
+    <!-- 🔍 Search Bar -->
     <div class="mb-4 text-center">
-        <strong>Filter by Category:</strong>
+        <form method="get" action="" class="d-inline-flex">
+            <input type="text" name="search" class="form-control form-control-sm me-2 stylish-search"
+                   placeholder="Search products..." value="{{ request.GET.search }}">
+            <button class="btn btn-outline-light btn-sm">Search</button>
+        </form>
+    </div>
+
+    <!-- 📂 Category Buttons -->
+    <div class="mb-5 text-center category-buttons">
         {% for cat in all_categories %}
             {% if cat.gender == gender %}
-                <a href="{% url 'products_by_category' gender=cat.gender category_slug=cat.slug %}" class="btn btn-outline-light btn-sm mx-1 {% if cat.slug == category.slug %}active{% endif %}">
+                <a href="{% url 'products_by_category' gender=cat.gender category_slug=cat.slug %}" 
+                   class="btn category-btn {% if cat.slug == category.slug %}active{% endif %}">
                     {{ cat.name }}
                 </a>
             {% endif %}
         {% endfor %}
     </div>
 
+    <!-- 🛍 Products -->
     {% if products %}
-        <div class="row">
+        <div class="row g-4">
             {% for product in products %}
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 bg-dark text-white">
+                <div class="col-md-4">
+                    <div class="card h-100 bg-dark text-white stylish-card">
                         <a href="{% url 'product_detail' product.pk %}">
                             {% if product.image %}
-                                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                                <img src="{{ product.image.url }}" class="card-img-top stylish-img" alt="{{ product.name }}">
                             {% else %}
-                                <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="No image">
+                                <img src="https://via.placeholder.com/300x300" class="card-img-top stylish-img" alt="No image">
                             {% endif %}
                         </a>
                         <div class="card-body">
@@ -35,7 +47,7 @@
                                     {{ product.name }}
                                 </a>
                             </h5>
-                            <p class="card-text">{{ product.description|truncatewords:15 }}</p>
+                            <p class="card-text text-muted small">{{ product.description|truncatewords:12 }}</p>
                             <p class="card-text fw-bold">€{{ product.price }}</p>
                         </div>
                     </div>

@@ -34,7 +34,7 @@
               {% if order.items.count > 3 %}…{% endif %}
             </div>
           </div>
-          <a href="{% url 'order_detail' order.id %}" class="btn btn-outline-light btn-sm">View Details</a>
+          <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-outline-light btn-sm">View Details</a>
         </li>
       {% endfor %}
     </ul>

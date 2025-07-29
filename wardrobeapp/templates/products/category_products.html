@@ -3,42 +3,167 @@
 
 {% block content %}
 <div class="container py-5 text-white">
-    <h2 class="text-center mb-4">{{ gender }}'s Collection{% if selected_category %}: {{ selected_category.name }}{% endif %}</h2>
 
-    <!-- Category Filter Bar -->
+    <!-- 🏷 Page Title -->
+    <h2 class="text-center mb-4 stylish-heading">
+        {{ gender }}'s Collection{% if selected_category %}: {{ selected_category.name }}{% endif %}
+    </h2>
+
+    <!-- 🔍 Search Bar -->
     <div class="mb-4 text-center">
-        <a href="?{% if gender == 'Men' %}gender=men{% else %}gender=women{% endif %}" class="btn btn-outline-light {% if not selected_category %}active{% endif %} me-2">All</a>
+        <form method="get" action="" class="d-inline-flex stylish-search-form">
+            {% if selected_category %}
+                <input type="hidden" name="category" value="{{ selected_category.slug }}">
+            {% endif %}
+            <input type="text" name="search" class="form-control form-control-sm stylish-search me-2"
+                   placeholder="Search products..." value="{{ request.GET.search }}">
+            <button class="btn btn-outline-light btn-sm">Search</button>
+        </form>
+    </div>
+
+    <!-- 📂 Category Filter -->
+    <div class="mb-5 text-center category-buttons">
+        <a href="?{% if gender == 'Men' %}gender=men{% else %}gender=women{% endif %}" 
+           class="btn category-btn {% if not selected_category %}active{% endif %} me-2">All</a>
         {% for category in categories %}
-            <a href="?category={{ category.slug }}" class="btn btn-outline-light {% if selected_category and selected_category.slug == category.slug %}active{% endif %} me-2">
+            <a href="?category={{ category.slug }}" 
+               class="btn category-btn {% if selected_category and selected_category.slug == category.slug %}active{% endif %} me-2">
                 {{ category.name }}
             </a>
         {% endfor %}
     </div>
 
-    <!-- Product Cards -->
-    <div class="row">
+    <!-- 🛍 Product Grid -->
+    <div class="row g-4">
         {% for product in products %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 bg-dark text-white">
+            <div class="col-md-4">
+                <div class="card h-100 bg-dark text-white stylish-card shadow-sm">
+                    <!-- Image -->
                     <a href="{% url 'product_detail' product.pk %}">
                         {% if product.image %}
-                            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                            <img src="{{ product.image.url }}" class="card-img-top stylish-img" alt="{{ product.name }}">
                         {% else %}
-                            <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="No image">
+                            <img src="https://via.placeholder.com/300x300" class="card-img-top stylish-img" alt="No image">
                         {% endif %}
                     </a>
-                    <div class="card-body">
-                        <h5 class="card-title">
+                    <!-- Details -->
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title mb-1">
                             <a href="{% url 'product_detail' product.pk %}" class="text-white text-decoration-none">
                                 {{ product.name }}
                             </a>
                         </h5>
-                        <p class="card-text">{{ product.description|truncatewords:15 }}</p>
-                        <p class="card-text fw-bold">€{{ product.price }}</p>
+                        <p class="card-text text-muted small">{{ product.description|truncatewords:10 }}</p>
+                        <p class="card-text fw-bold text-light">€{{ product.price }}</p>
+
+                        {% if product.is_available %}
+                            <!-- Add to Cart Form -->
+                            <form class="add-to-cart-form mt-auto" 
+                                  data-url="{% url 'add_to_cart' product.id %}" method="post">
+                                {% csrf_token %}
+                                <div class="mb-2">
+                                    <select name="size" class="form-select form-select-sm stylish-select" required>
+                                        <option value="" disabled selected>Select Size</option>
+                                        {% for size in product.sizes.all %}
+                                            <option value="{{ size.id }}">{{ size.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="d-flex">
+                                    <input type="number" name="quantity" value="1" min="1" 
+                                           class="form-control form-control-sm me-2 stylish-qty" required>
+                                    <button type="submit" class="btn btn-success btn-sm stylish-add-btn flex-grow-1">
+                                        Add to Cart
+                                    </button>
+                                </div>
+                            </form>
+                        {% else %}
+                            <div class="alert alert-warning p-1 text-center mt-auto mb-0 small">
+                                Out of Stock
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
+        {% empty %}
+            <p class="text-center">No products found.</p>
         {% endfor %}
     </div>
 </div>
-{% endblock %}  
+
+<!-- ✅ Cart Alert Popup -->
+<div id="cart-alert" class="position-fixed top-0 end-0 mt-5 me-3 p-3 bg-dark text-white shadow-lg border border-success rounded d-none"
+     style="z-index: 1055; width: 360px;">
+    <div class="mb-2 fw-bold text-success">
+        ✅ <span id="cart-alert-success-msg">Item added to cart!</span>
+    </div>
+    <div class="d-flex align-items-start mb-2">
+        <img id="cart-alert-image" src="" class="me-3 rounded border" alt="product" width="70" height="70">
+        <div class="flex-grow-1">
+            <h6 id="cart-alert-name" class="mb-1 text-light fw-bold">Product Name</h6>
+            <p class="mb-1 text-muted small">
+                Size: <span id="cart-alert-size">-</span><br>
+                Quantity: <span id="cart-alert-quantity">-</span><br>
+                Price: €<span id="cart-alert-price">-</span>
+            </p>
+        </div>
+    </div>
+    <hr class="my-2 border-light">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <small>Total: €<span id="cart-alert-total">-</span></small><br>
+            <small>Items: <span id="cart-alert-items">-</span></small>
+        </div>
+        <a href="{% url 'cart:detail' %}" class="btn btn-success btn-sm">Checkout</a>
+    </div>
+</div>
+
+<!-- ✅ AJAX Add to Cart -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.add-to-cart-form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const url = form.dataset.url;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                },
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Populate alert
+                document.getElementById('cart-alert-success-msg').textContent = `${data.name} added to cart!`;
+                document.getElementById('cart-alert-image').src = data.image || 'https://via.placeholder.com/70';
+                document.getElementById('cart-alert-name').textContent = data.name;
+                document.getElementById('cart-alert-price').textContent = parseFloat(data.price).toFixed(2);
+                document.getElementById('cart-alert-quantity').textContent = data.quantity;
+                document.getElementById('cart-alert-size').textContent = data.size || '-';
+                document.getElementById('cart-alert-total').textContent = parseFloat(data.cart_total_price).toFixed(2);
+                document.getElementById('cart-alert-items').textContent = data.cart_total_items;
+
+                const alertBox = document.getElementById('cart-alert');
+                alertBox.classList.remove('d-none');
+                setTimeout(() => alertBox.classList.add('show'), 10);
+                setTimeout(() => {
+                    alertBox.classList.remove('show');
+                    setTimeout(() => alertBox.classList.add('d-none'), 300);
+                }, 6000);
+
+                // Update cart counter
+                const cartCountEl = document.getElementById('cart-count');
+                if (cartCountEl) {
+                    cartCountEl.textContent = data.cart_count;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+});
+</script>
+{% endblock %}

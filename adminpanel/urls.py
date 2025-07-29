@@ -15,4 +15,7 @@ urlpatterns = [
     path('sizes/add/', views.size_form, name='size_add'),
     path('sizes/<int:size_id>/edit/', views.size_form, name='size_edit'),
     path('sizes/<int:size_id>/delete/', views.size_delete, name='size_delete'),
+
+    # ✅ New delete product image route
+    path('products/images/<int:image_id>/delete/', views.delete_product_image, name='delete_product_image'),
 ]

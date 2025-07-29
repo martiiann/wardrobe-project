@@ -12,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import UserUpdateForm, ProfileUpdateForm
 from .models import Profile
+from django.db.models import Q
 
 # Home Page
 def home(request):
@@ -55,6 +56,7 @@ def add_to_cart(request, product_id):
 def mens_clothing(request):
     categories = Category.objects.filter(gender='men')
     selected_category_slug = request.GET.get('category')
+    search_query = request.GET.get('search')  # 🔍 NEW
     products = Product.objects.filter(gender='men', is_available=True)
 
     if selected_category_slug:
@@ -63,6 +65,11 @@ def mens_clothing(request):
     else:
         selected_category = None
 
+    if search_query:  # 🔍 Filter by name or description
+        products = products.filter(
+            Q(name__icontains=search_query) | Q(description__icontains=search_query)
+        )
+
     return render(request, 'products/category_products.html', {
         'gender': 'Men',
         'categories': categories,
@@ -70,10 +77,12 @@ def mens_clothing(request):
         'selected_category': selected_category,
     })
 
+
 # Women's Clothing Page
 def womens_clothing(request):
     categories = Category.objects.filter(gender='women')
     selected_category_slug = request.GET.get('category')
+    search_query = request.GET.get('search')  # 🔍 NEW
     products = Product.objects.filter(gender='women', is_available=True)
 
     if selected_category_slug:
@@ -81,6 +90,11 @@ def womens_clothing(request):
         products = products.filter(category=selected_category)
     else:
         selected_category = None
+
+    if search_query:  # 🔍 Filter by name or description
+        products = products.filter(
+            Q(name__icontains=search_query) | Q(description__icontains=search_query)
+        )
 
     return render(request, 'products/category_products.html', {
         'gender': 'Women',

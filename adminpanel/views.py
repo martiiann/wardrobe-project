@@ -79,6 +79,8 @@ def product_list(request):
 @login_required
 @user_passes_test(admin_required)
 def product_edit(request, product_id=None):
+    from products.models import ProductImage  # ✅ import inline to avoid issues
+
     if product_id:
         product = get_object_or_404(Product, id=product_id)
     else:
@@ -87,15 +89,24 @@ def product_edit(request, product_id=None):
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
-            form.save()
+            product = form.save()
+
+            # ✅ Handle multiple images
+            for img in request.FILES.getlist('extra_images'):
+                ProductImage.objects.create(product=product, image=img)
+
             messages.success(request, 'Product saved successfully!')
             return redirect('adminpanel:product_list')
     else:
         form = ProductForm(instance=product)
 
+    # ✅ Fetch extra images to show in template
+    extra_images = product.images.all() if product else []
+
     return render(request, 'adminpanel/product_form.html', {
         'form': form,
-        'product': product
+        'product': product,
+        'extra_images': extra_images
     })
 
 @login_required
@@ -131,3 +142,13 @@ def size_delete(request, size_id):
     size = get_object_or_404(Size, id=size_id)
     size.delete()
     return redirect('adminpanel:size_list')
+
+@login_required
+@user_passes_test(admin_required)
+def delete_product_image(request, image_id):
+    from products.models import ProductImage
+    image = get_object_or_404(ProductImage, id=image_id)
+    product_id = image.product.id
+    image.delete()
+    messages.success(request, "Product image deleted successfully.")
+    return redirect('adminpanel:product_edit', product_id=product_id)

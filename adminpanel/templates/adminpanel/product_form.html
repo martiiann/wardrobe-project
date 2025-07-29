@@ -13,48 +13,81 @@
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
 
+      <!-- Product Name -->
       <div class="mb-3">
         <label for="id_name" class="form-label">Name</label>
         {{ form.name|add_class:"form-control text-dark" }}
       </div>
 
+      <!-- Category -->
       <div class="mb-3">
         <label for="id_category" class="form-label">Category</label>
         {{ form.category|add_class:"form-select text-dark" }}
       </div>
 
+      <!-- Description -->
       <div class="mb-3">
         <label for="id_description" class="form-label">Description</label>
         {{ form.description|add_class:"form-control text-dark" }}
       </div>
 
+      <!-- Price -->
       <div class="mb-3">
         <label for="id_price" class="form-label">Price</label>
         {{ form.price|add_class:"form-control text-dark" }}
       </div>
 
+      <!-- Main Image -->
       <div class="mb-3">
         <label for="id_image" class="form-label">Main Image</label>
         {{ form.image|add_class:"form-control text-dark" }}
       </div>
 
+      <!-- ✅ Additional Images Upload -->
+      <div class="mb-3">
+        <label for="extra_images" class="form-label">Additional Images</label>
+        <input type="file" name="extra_images" id="extra_images" class="form-control text-dark" multiple>
+        <small class="text-muted">You can select multiple images.</small>
+      </div>
+
+      <!-- ✅ Existing Images Preview -->
+      {% if product and product.images.all %}
+      <div class="mb-3">
+        <label class="form-label">Existing Images</label>
+        <div class="d-flex flex-wrap gap-3">
+          {% for img in product.images.all %}
+          <div class="position-relative border rounded" style="width: 120px; height: 120px; overflow:hidden;">
+            <img src="{{ img.image.url }}" alt="Image" class="img-fluid" style="width:100%; height:100%; object-fit:cover;">
+            <a href="{% url 'adminpanel:delete_product_image' img.id %}" 
+               class="btn btn-sm btn-danger position-absolute top-0 end-0"
+               style="padding:2px 6px;">×</a>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Availability -->
       <div class="mb-3">
         <label for="id_is_available" class="form-label">Available</label>
         {{ form.is_available|add_class:"form-check-input ms-2" }}
       </div>
 
+      <!-- Gender -->
       <div class="mb-3">
         <label for="id_gender" class="form-label">Gender</label>
         {{ form.gender|add_class:"form-select text-dark" }}
       </div>
 
+      <!-- Sizes -->
       <div class="mb-3">
         <label class="form-label">Sizes</label>
         <div class="form-check">
-        {{ form.sizes }}
+          {{ form.sizes }}
+        </div>
       </div>
-    </div>
 
+      <!-- Buttons -->
       <div class="d-flex justify-content-start">
         <button type="submit" class="btn btn-primary me-2">
           {% if product %}Update{% else %}Create{% endif %}
