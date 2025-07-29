@@ -14,6 +14,8 @@ from .models import Order, OrderItem
 from cart.cart import Cart
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseForbidden
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 
 @login_required
 def order_history(request):
@@ -27,7 +29,13 @@ def order_detail(request, order_id):
     if order.user != request.user:
         return HttpResponseForbidden("You do not have permission to view this order.")
 
-    return render(request, 'orders/order_detail.html', {'order': order})
+    # ✅ Add full site URL
+    site_url = request.build_absolute_uri('/')
+
+    return render(request, 'orders/order_detail.html', {
+        'order': order,
+        'site_url': site_url,  # pass to template
+    })
 
 @login_required
 def checkout(request):
@@ -184,7 +192,6 @@ def stripe_webhook(request):
             )
             print("🧾 Order created:", order.id)
 
-            # ✅ Rebuild OrderItems from cart JSON
             try:
                 from products.models import Product, Size
                 from .models import OrderItem
@@ -204,48 +211,57 @@ def stripe_webhook(request):
             except Exception as e:
                 print("❌ Failed to create OrderItems:", e)
 
-            # Build item summary for email
             items = order.items.all()
-            item_lines = []
-            for item in items:
-                line = f"- {item.product.name} (x{item.quantity}) - ${item.price:.2f}"
-                if item.size:
-                    line += f" [Size: {item.size.name}]"
-                item_lines.append(line)
 
-            item_summary = "\n".join(item_lines)
+            site_url = settings.SITE_URL if hasattr(settings, 'SITE_URL') else 'http://127.0.0.1:8000'
+            order_url = f"{site_url}/orders/{order.id}/"
 
-            # Email body
-            message = f"""Hi {user.first_name},
+            try:
+                # ✅ Customer: HTML email with fallback
+                html_message = render_to_string('orders/email_confirmation.html', {
+                    'order': order,
+                    'items': items,
+                    'user': user,
+                    'order_url': order_url,
+                })
+
+                plain_text = f"""Hi {user.first_name},
 
 Thank you for your order #{order.id}!
 
-Here’s what you ordered:
-{item_summary}
-
 Total: ${order.total_price:.2f}
 
-We’ll notify you when your items are shipped.
-
-Best regards,  
-Wardrobe Team
+You can view your order here: {order_url}
 """
 
-            try:
-                send_mail(
+                email = EmailMultiAlternatives(
                     subject="Order Confirmation",
-                    message=message,
+                    body=plain_text,
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[order.email],
+                    to=[order.email],
+                )
+                email.attach_alternative(html_message, "text/html")
+                email.send()
+                print("📧 HTML email sent to:", order.email)
+
+                # ✅ Admin: plain text
+                admin_message = f"""New order #{order.id} from {user.email}
+Total: ${order.total_price:.2f}
+View: {order_url}
+"""
+                send_mail(
+                    subject=f"🛍️ New Order #{order.id} from {user.email}",
+                    message=admin_message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[settings.DEFAULT_FROM_EMAIL],
                     fail_silently=False
                 )
-                print("📧 Email sent to:", order.email)
+                print("📬 Admin notified of new order.")
+
             except Exception as e:
                 print("❌ Email sending failed:", e)
-        else:
-            print("❌ User not found from metadata user_id:", metadata.get('user_id'))
 
-    return HttpResponse(status=200)
+            return HttpResponse(status=200)
 
 @login_required
 def success(request):

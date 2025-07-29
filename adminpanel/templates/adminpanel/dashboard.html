@@ -1,0 +1,7 @@
+{% extends 'adminpanel/base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h1 class="mb-4">Admin Dashboard</h1>
+  <a href="{% url 'adminpanel:admin_order_list' %}" class="btn btn-primary">View All Orders</a>
+</div>
+{% endblock %}

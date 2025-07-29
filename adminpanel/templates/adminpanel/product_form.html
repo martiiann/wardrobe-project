@@ -1,0 +1,67 @@
+{% extends 'adminpanel/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ product.name|default:"Add Product" }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="bg-white p-5 shadow rounded text-dark" style="max-width: 900px; margin: auto;">
+    <h2 class="mb-4 fw-bold">
+      {% if product %}Edit Product{% else %}Add New Product{% endif %}
+    </h2>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label for="id_name" class="form-label">Name</label>
+        {{ form.name|add_class:"form-control text-dark" }}
+      </div>
+
+      <div class="mb-3">
+        <label for="id_category" class="form-label">Category</label>
+        {{ form.category|add_class:"form-select text-dark" }}
+      </div>
+
+      <div class="mb-3">
+        <label for="id_description" class="form-label">Description</label>
+        {{ form.description|add_class:"form-control text-dark" }}
+      </div>
+
+      <div class="mb-3">
+        <label for="id_price" class="form-label">Price</label>
+        {{ form.price|add_class:"form-control text-dark" }}
+      </div>
+
+      <div class="mb-3">
+        <label for="id_image" class="form-label">Main Image</label>
+        {{ form.image|add_class:"form-control text-dark" }}
+      </div>
+
+      <div class="mb-3">
+        <label for="id_is_available" class="form-label">Available</label>
+        {{ form.is_available|add_class:"form-check-input ms-2" }}
+      </div>
+
+      <div class="mb-3">
+        <label for="id_gender" class="form-label">Gender</label>
+        {{ form.gender|add_class:"form-select text-dark" }}
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Sizes</label>
+        <div class="form-check">
+        {{ form.sizes }}
+      </div>
+    </div>
+
+      <div class="d-flex justify-content-start">
+        <button type="submit" class="btn btn-primary me-2">
+          {% if product %}Update{% else %}Create{% endif %}
+        </button>
+        <a href="{% url 'adminpanel:product_list' %}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

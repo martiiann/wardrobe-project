@@ -22,13 +22,13 @@ from wardrobeapp import views
 from orders import views as order_views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    #path('admin/', admin.site.urls),
     path('', include('wardrobeapp.urls')),
     path('shop/', include('products.urls')),
     path('shop/<str:gender>/<slug:category_slug>/', views.products_by_category, name='products_by_category'),
     path('orders/', include('orders.urls')),
     path('faq/', include(('faq.urls', 'faq'), namespace='faq')),
-    path('stripe/webhook/', order_views.stripe_webhook, name='stripe_webhook'),
+    path('adminpanel/', include('adminpanel.urls')),
 ]
 
 if settings.DEBUG:

@@ -1,0 +1,57 @@
+{% extends 'adminpanel/base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Order #{{ order.id }} Details</h2>
+  
+  <!-- Customer Info -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5>Customer Info</h5>
+      <p><strong>User:</strong> {{ order.user.username }}</p>
+      <p><strong>Email:</strong> {{ order.user.email }}</p>
+      <p><strong>Address:</strong> {{ order.address }}</p>
+    </div>
+  </div>
+
+  <!-- Order Items -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5>Order Items</h5>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Size</th>
+            <th>Quantity</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in order_items %}
+          <tr>
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.size }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>${{ item.price }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <h5 class="text-end">Total: ${{ order.total_price }}</h5>
+    </div>
+  </div>
+
+  <!-- Update Order -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5>Update Order</h5>
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Update Order</button>
+        <a href="{% url 'adminpanel:admin_order_list' %}" class="btn btn-secondary">Back to Orders</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

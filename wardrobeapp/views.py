@@ -114,6 +114,13 @@ def register(request):
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
+
+            # Only login if profile does not already exist
+            if not hasattr(user, 'profile'):
+                # Signal should handle this, but just in case:
+                from wardrobeapp.models import Profile
+                Profile.objects.get_or_create(user=user)
+
             login(request, user)
             messages.success(request, 'Account created successfully!')
             return redirect('profile')
