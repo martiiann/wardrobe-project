@@ -1,46 +1,57 @@
 {% extends 'adminpanel/base.html' %}
-{% load widget_tweaks %}
-
-{% block title %}Order #{{ order.id }}{% endblock %}
-
 {% block content %}
-<div class="container my-5">
-  <div class="bg-white p-5 shadow rounded text-dark" style="max-width: 900px; margin: auto;">
-    <h2 class="mb-4 fw-bold">Order #{{ order.id }}</h2>
+<div class="container mt-5">
+  <h2>Order #{{ order.id }} Details</h2>
+  
+  <!-- Customer Info -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5>Customer Info</h5>
+      <p><strong>User:</strong> {{ order.user.username }}</p>
+      <p><strong>Email:</strong> {{ order.user.email }}</p>
+      <p><strong>Address:</strong> {{ order.address }}</p>
+    </div>
+  </div>
 
-    <p><strong>User:</strong> {{ order.user }}</p>
-    <p><strong>Email:</strong> {{ order.user.email }}</p>
-    <p><strong>Total:</strong> ${{ order.total_amount }}</p>
-    <p><strong>Placed:</strong> {{ order.created_at|date:"Y-m-d H:i" }}</p>
+  <!-- Order Items -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5>Order Items</h5>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Size</th>
+            <th>Quantity</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in order_items %}
+          <tr>
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.size }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>${{ item.price }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <h5 class="text-end">Total: ${{ order.total_price }}</h5>
+    </div>
+  </div>
 
-    <hr class="my-4">
-
-    <h4 class="fw-semibold mb-3">Update Order</h4>
-    <form method="post" class="row g-3">
-      {% csrf_token %}
-      <div class="col-md-6">
-        {{ form.status|add_class:"form-select text-dark" }}
-      </div>
-      <div class="col-md-6">
-        {{ form.tracking_number|add_class:"form-control text-dark" }}
-      </div>
-      <div class="col-12">
-        <button type="submit" class="btn btn-success me-2">Save Changes</button>
+  <!-- Update Order -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5>Update Order</h5>
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Update Order</button>
         <a href="{% url 'adminpanel:admin_order_list' %}" class="btn btn-secondary">Back to Orders</a>
-      </div>
-    </form>
-
-    <hr class="my-4">
-
-    <h5 class="fw-semibold mb-3">Items</h5>
-    <ul class="list-group">
-      {% for item in order.items.all %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          {{ item.product.name }} (x{{ item.quantity }})
-          <span>${{ item.total_price }}</span>
-        </li>
-      {% endfor %}
-    </ul>
+      </form>
+    </div>
   </div>
 </div>
 {% endblock %}

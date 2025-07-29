@@ -24,22 +24,28 @@
   </div>
 
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-      <a class="navbar-brand" href="{% url 'adminpanel:admin_dashboard' %}">Admin Panel</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="{% url 'adminpanel:admin_order_list' %}">Orders</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'adminpanel:product_list' %}">Products</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'adminpanel:size_list' %}">Sizes</a></li>
-          <li class="nav-item"><a class="nav-link text-danger" href="{% url 'logout' %}">Logout</a></li>
-        </ul>
-      </div>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'adminpanel:admin_dashboard' %}">Admin Panel</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="{% url 'adminpanel:admin_order_list' %}">Orders</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'adminpanel:product_list' %}">Products</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'adminpanel:size_list' %}">Sizes</a></li>
+
+        <!-- Return to Shop -->
+        <li class="nav-item">
+          <a class="nav-link text-warning" href="{% url 'home' %}">← Return to Shop</a>
+        </li>
+
+        <li class="nav-item"><a class="nav-link text-danger" href="{% url 'logout' %}">Logout</a></li>
+      </ul>
     </div>
-  </nav>
+  </div>
+</nav>
 
   <!-- Main Content -->
   <main class="container py-4 flex-grow-1">
