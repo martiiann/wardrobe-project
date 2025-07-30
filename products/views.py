@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Category, Product
+from django.urls import reverse
 
 def shop_view(request):
     men_categories = Category.objects.filter(gender='men')
@@ -23,4 +24,15 @@ def product_list(request):
 
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
-    return render(request, 'products/product_detail.html', {'product': product})
+
+    # ✅ Store "came from cart" info in session
+    from_cart = request.GET.get('from_cart') == 'true'
+    if from_cart:
+        request.session['from_cart'] = True
+    else:
+        request.session.pop('from_cart', None)
+
+    return render(request, 'products/product_detail.html', {
+        'product': product,
+        'from_cart': request.session.get('from_cart', False)
+    })

@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from products.models import Product
 from .cart import Cart
+from django.urls import reverse
+from django.contrib import messages
+from django.contrib.messages import get_messages
 
 def cart_detail(request):
     cart = Cart(request)
@@ -31,7 +34,10 @@ def cart_add(request, product_id, size=None):
 def cart_remove(request, product_id, size=None):
     cart = Cart(request)
     product = get_object_or_404(Product, id=product_id)
+    
     cart.remove(product, size)
+    messages.success(request, f"{product.name} was removed from your cart.")
+    
     return redirect('cart:detail')
 
 def cart_update(request, product_id, size=None):

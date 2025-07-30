@@ -47,6 +47,15 @@
         <div class="col-md-6 d-flex">
             <div class="bg-dark bg-opacity-75 p-4 rounded shadow-lg flex-grow-1 d-flex flex-column justify-content-between">
 
+                <!-- Back to Cart Button -->
+                {% if from_cart %}
+                    <div class="mb-3">
+                        <a href="{% url 'cart:detail' %}" class="btn btn-outline-light btn-sm">
+                            ← Back to Cart
+                        </a>
+                    </div>
+                {% endif %}
+
                 <!-- Top Info -->
                 <div>
                     <h2 class="fw-bold mb-3">{{ product.name }}</h2>

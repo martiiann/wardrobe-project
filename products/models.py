@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -42,6 +43,9 @@ class Product(models.Model):
     
     def get_current_price(self):
         return self.price
+
+    def get_absolute_url(self):
+        return reverse('product_detail', args=[str(self.id)])
     
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
