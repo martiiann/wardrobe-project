@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load widget_tweaks %}
 {% block title %}Checkout{% endblock %}
 
 {% block content %}
@@ -23,11 +24,34 @@
   </div>
 
   <!-- Checkout Form -->
- <form id="payment-form" method="POST">
+  <form id="payment-form" method="POST">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button id="checkout-button" class="btn btn-success mt-3" type="button">Pay with Card</button>
-</form>
+
+    {% if user.is_authenticated %}
+      <div class="mb-3">
+        <label class="form-label">Email (confirmation will be sent here)</label>
+        <input type="email" class="form-control bg-dark text-white border-secondary"
+               name="email" id="id_email" value="{{ user.email }}" readonly>
+      </div>
+    {% else %}
+      <div class="mb-3">
+        <label class="form-label">Email (confirmation will be sent here)</label>
+        <input type="email" class="form-control bg-dark text-white border-secondary"
+               name="email" id="id_email" required>
+      </div>
+    {% endif %}
+
+    {{ form.full_name.label_tag }} {{ form.full_name }}
+    {{ form.address.label_tag }} {{ form.address }}
+    {{ form.city.label_tag }} {{ form.city }}
+    {{ form.postal_code.label_tag }} {{ form.postal_code }}
+    {{ form.country.label_tag }} {{ form.country }}
+    {{ form.payment_method.label_tag }} {{ form.payment_method }}
+
+    <button id="checkout-button" class="btn btn-success mt-3 w-100" type="button">
+      Pay with Card
+    </button>
+  </form>
 </div>
 
 <script src="https://js.stripe.com/v3/"></script>
@@ -35,14 +59,15 @@
   const stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
 
   document.getElementById("checkout-button").addEventListener("click", function () {
-    // Get form field values
-    const fullName = document.getElementById("id_full_name").value;
-    const email = document.getElementById("id_email").value;
-    const address = document.getElementById("id_address").value;
-    const city = document.getElementById("id_city").value;
-    const postalCode = document.getElementById("id_postal_code").value;
-    const country = document.getElementById("id_country").value;
-    const paymentMethod = document.getElementById("id_payment_method").value;
+    const data = {
+      full_name: document.getElementById("id_full_name").value,
+      email: document.getElementById("id_email").value,
+      address: document.getElementById("id_address").value,
+      city: document.getElementById("id_city").value,
+      postal_code: document.getElementById("id_postal_code").value,
+      country: document.getElementById("id_country").value,
+      payment_method: document.getElementById("id_payment_method").value
+    };
 
     fetch("{% url 'orders:create_checkout_session' %}", {
       method: "POST",
@@ -50,22 +75,15 @@
         "X-CSRFToken": "{{ csrf_token }}",
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        full_name: fullName,
-        email: email,
-        address: address,
-        city: city,
-        postal_code: postalCode,
-        country: country,
-        payment_method: paymentMethod
-      })
+      body: JSON.stringify(data)
     })
     .then(response => response.json())
     .then(data => {
       if (data.id) {
-        return stripe.redirectToCheckout({ sessionId: data.id });
+        // ✅ Redirect to Stripe Checkout
+        stripe.redirectToCheckout({ sessionId: data.id });
       } else {
-        alert("Something went wrong.");
+        alert("Something went wrong: " + (data.error || "Unknown error"));
       }
     })
     .catch(error => {
@@ -74,5 +92,4 @@
     });
   });
 </script>
-
 {% endblock %}

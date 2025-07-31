@@ -6,11 +6,12 @@ class CheckoutForm(forms.ModelForm):
         model = Order
         fields = ['full_name', 'email', 'address', 'city', 'postal_code', 'country', 'payment_method']
         widgets = {
-            'full_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'address': forms.TextInput(attrs={'class': 'form-control'}),
-            'city': forms.TextInput(attrs={'class': 'form-control'}),
-            'postal_code': forms.TextInput(attrs={'class': 'form-control'}),
-            'country': forms.TextInput(attrs={'class': 'form-control'}),
-            'payment_method': forms.Select(attrs={'class': 'form-select'}),
+            'full_name': forms.TextInput(attrs={'class': 'form-control bg-dark text-white'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control bg-dark text-white'}),
+            'address': forms.TextInput(attrs={'class': 'form-control bg-dark text-white'}),
+            'city': forms.TextInput(attrs={'class': 'form-control bg-dark text-white'}),
+            'postal_code': forms.TextInput(attrs={'class': 'form-control bg-dark text-white'}),
+            'country': forms.TextInput(attrs={'class': 'form-control bg-dark text-white'}),
+            'payment_method': forms.Select(attrs={'class': 'form-select bg-dark text-white'}),
         }
+

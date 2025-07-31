@@ -15,9 +15,13 @@ class Order(models.Model):
         ('Delivered', 'Delivered'),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    # 🔹 User can be null for guest checkout
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+
     full_name = models.CharField(max_length=100)
     email = models.EmailField()
+    guest_token = models.CharField(max_length=64, editable=False, null=True, blank=True)  # ✅ Changed to CharField
+
     address = models.CharField(max_length=255)
     city = models.CharField(max_length=100)
     postal_code = models.CharField(max_length=20)
@@ -31,7 +35,6 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     is_completed = models.BooleanField(default=False)
 
-    # ✅ New admin panel fields
     tracking_number = models.CharField(max_length=100, blank=True, null=True)
     status = models.CharField(
         max_length=20,
@@ -40,7 +43,11 @@ class Order(models.Model):
     )
 
     def __str__(self):
-        return f"Order #{self.id} by {self.user.username}"
+        return f"Order #{self.id} ({self.user.username if self.user else 'Guest'})"
+
+    def get_guest_order_url(self):
+        from django.urls import reverse
+        return f"{reverse('orders:guest_order_detail', args=[self.id, self.guest_token])}"
 
 
 class OrderItem(models.Model):
@@ -52,3 +59,4 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"
+ 
