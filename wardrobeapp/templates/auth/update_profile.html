@@ -2,22 +2,39 @@
 {% block title %}Edit Profile{% endblock %}
 
 {% block content %}
-<div class="container py-5 text-white">
-  <h2 class="mb-4">Edit Profile</h2>
+<div class="container py-5 d-flex flex-column align-items-center">
 
-  <form method="POST" class="bg-dark p-4 rounded shadow">
-    {% csrf_token %}
-    
-    <h4 class="text-light">Account Info</h4>
-    {{ user_form.as_p }}
+  <!-- Edit Profile Card -->
+  <div class="card shadow-lg bg-dark text-white p-4" style="max-width: 700px; width: 100%;">
+    <h2 class="text-center mb-4">Edit Profile</h2>
 
-    <hr class="my-4">
+    <form method="POST">
+      {% csrf_token %}
 
-    <h4 class="text-light">Shipping & Payment</h4>
-    {{ profile_form.as_p }}
+      <!-- Account Info -->
+      <div class="mb-4 border rounded p-3 bg-secondary">
+        <h5 class="mb-3">Account Information</h5>
+        <div class="mb-3">
+          {{ user_form.as_p }}
+        </div>
+      </div>
 
-    <button type="submit" class="btn btn-success mt-3">Save Changes</button>
-    <a href="{% url 'profile' %}" class="btn btn-secondary mt-3">Cancel</a>
-  </form>
+      <!-- Shipping & Payment -->
+      <div class="mb-4 border rounded p-3 bg-secondary">
+        <h5 class="mb-3">Shipping & Payment</h5>
+        <div class="mb-3">
+          {{ profile_form.as_p }}
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="d-flex justify-content-between">
+        <button type="submit" class="btn btn-success w-50 me-2">Save Changes</button>
+        <a href="{% url 'profile' %}" class="btn btn-secondary w-50">Cancel</a>
+      </div>
+
+    </form>
+  </div>
+
 </div>
 {% endblock %}

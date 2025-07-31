@@ -2,80 +2,73 @@
 {% block title %}My Profile{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-  <h2 class="text-center">Welcome, {{ user.username }}!</h2>
-  <p class="text-center">Email: {{ user.email }}</p>
+<div class="container py-5 d-flex flex-column align-items-center">
+  
+  <!-- Profile Card -->
+  <div class="card shadow-lg bg-dark text-white p-4 mb-5" style="max-width: 700px; width: 100%;">
+    <h2 class="text-center mb-4">Welcome, {{ user.username }}!</h2>
+    <p class="text-center mb-4">Email: {{ user.email }}</p>
 
-  <div class="row justify-content-center mt-4">
-    <div class="col-md-6">
-      <div class="card mb-4">
-        <div class="card-header bg-dark text-white">
-          Address Information
-        </div>
-        <div class="card-body">
-          {% if user.profile.address %}
-            <p><strong>Address:</strong> {{ user.profile.address }}</p>
-            <p><strong>City:</strong> {{ user.profile.city }}</p>
-            <p><strong>Postal Code:</strong> {{ user.profile.postal_code }}</p>
-            <p><strong>Country:</strong> {{ user.profile.country }}</p>
-          {% else %}
-            <p class="text-muted">No address saved yet.</p>
-          {% endif %}
-        </div>
-      </div>
+    <!-- Address Info -->
+    <div class="mb-4 border rounded p-3 bg-secondary">
+      <h5 class="mb-3">Address Information</h5>
+      {% if user.profile.address %}
+        <p><strong>Address:</strong> {{ user.profile.address }}</p>
+        <p><strong>City:</strong> {{ user.profile.city }}</p>
+        <p><strong>Postal Code:</strong> {{ user.profile.postal_code }}</p>
+        <p><strong>Country:</strong> {{ user.profile.country }}</p>
+      {% else %}
+        <p class="text-light fst-italic">No address saved yet.</p>
+      {% endif %}
+    </div>
 
-      <div class="card mb-4">
-        <div class="card-header bg-dark text-white">
-          Payment Method
-        </div>
-        <div class="card-body">
-          {% if user.profile.payment_method %}
-            <p><strong>Payment:</strong> {{ user.profile.payment_method }}</p>
-          {% else %}
-            <p class="text-muted">No payment method saved yet.</p>
-          {% endif %}
-        </div>
-      </div>
+    <!-- Payment Info -->
+    <div class="mb-4 border rounded p-3 bg-secondary">
+      <h5 class="mb-3">Payment Method</h5>
+      {% if user.profile.payment_method %}
+        <p><strong>Payment:</strong> {{ user.profile.payment_method }}</p>
+      {% else %}
+        <p class="text-light fst-italic">No payment method saved yet.</p>
+      {% endif %}
+    </div>
 
-      <div class="text-center">
-        <a href="{% url 'edit_profile' %}" class="btn btn-primary">Edit Profile</a>
-      </div>
+    <!-- Buttons -->
+    <div class="d-flex justify-content-between">
+      <a href="{% url 'edit_profile' %}" class="btn btn-success">Edit Profile</a>
+      <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
     </div>
   </div>
 
-  <div class="text-center mt-4">
-    <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+  <!-- Past Orders -->
+  <div class="card shadow-lg bg-dark text-white p-4" style="max-width: 700px; width: 100%;">
+    <h3 class="text-center mb-4">My Past Orders</h3>
+    {% if orders %}
+      {% for order in orders %}
+        <div class="card bg-secondary text-white mb-4">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Order #{{ order.id }} — {{ order.created_at|date:"F d, Y H:i" }}</span>
+            <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-sm btn-outline-light">View Details</a>
+          </div>
+          <ul class="list-group list-group-flush">
+            {% for item in order.items.all %}
+              <li class="list-group-item bg-dark text-white d-flex align-items-center">
+                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
+                     class="img-thumbnail me-3" style="width: 80px; height: 80px; object-fit: cover;">
+                <div>
+                  <strong>{{ item.product.name }}</strong><br>
+                  {% if item.size %}Size: {{ item.size.name }}<br>{% endif %}
+                  Quantity: {{ item.quantity }}<br>
+                  Price: £{{ item.price }}
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-center text-light fst-italic">You haven’t placed any orders yet.</p>
+    {% endif %}
   </div>
-
-  <hr class="my-5">
-
-<h3 class="text-center mb-4">My Past Orders</h3>
-{% if orders %}
-  {% for order in orders %}
-    <div class="card mb-4">
-      <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-         <span>Order #{{ order.id }} — {{ order.created_at|date:"F d, Y H:i" }}</span>
-         <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-sm btn-outline-light">View Details</a>
-     </div>
-      <ul class="list-group list-group-flush">
-        {% for item in order.items.all %}
-          <li class="list-group-item d-flex align-items-center">
-            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
-                 class="img-thumbnail me-3" style="width: 80px; height: 80px; object-fit: cover;">
-            <div>
-              <strong>{{ item.product.name }}</strong><br>
-              {% if item.size %}Size: {{ item.size.name }}<br>{% endif %}
-              Quantity: {{ item.quantity }}<br>
-              Price: £{{ item.price }}
-            </div>
-          </li>
-        {% endfor %}
-      </ul>
-    </div>
-  {% endfor %}
-{% else %}
-  <p class="text-center text-muted">You haven’t placed any orders yet.</p>
-{% endif %}
 
 </div>
 {% endblock %}
