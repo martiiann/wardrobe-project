@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from products.models import Product, Size
+from products.models import Product, Size, Category
 from .forms import ProductForm, SizeForm
 from orders.models import Order
 from .forms import OrderUpdateForm
@@ -18,6 +18,61 @@ def admin_required(user):
 def dashboard(request):
     return redirect('adminpanel:admin_order_list')
 
+@login_required
+@user_passes_test(admin_required)
+def admin_category_list(request):
+    categories = Category.objects.all()
+    return render(request, 'adminpanel/category_list.html', {'categories': categories}) 
+
+@login_required
+@user_passes_test(admin_required)
+def admin_add_category(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        slug = request.POST.get('slug')
+        gender = request.POST.get('gender')
+
+        if not name or not slug:
+            messages.error(request, "Name and slug are required.")
+        elif Category.objects.filter(slug=slug).exists():
+            messages.error(request, f"A category with slug '{slug}' already exists.")
+        else:
+            Category.objects.create(name=name, slug=slug, gender=gender)
+            messages.success(request, f"Category '{name}' added successfully.")
+            return redirect('adminpanel:admin_category_list')
+
+    return render(request, 'adminpanel/add_category.html')     
+
+@login_required
+@user_passes_test(admin_required)
+def admin_delete_category(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+    category.delete()
+    messages.success(request, f"Category '{category.name}' deleted successfully.")
+    return redirect('adminpanel:admin_category_list')
+
+@login_required
+@user_passes_test(admin_required)
+def admin_edit_category(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        slug = request.POST.get('slug')
+        gender = request.POST.get('gender')
+
+        if not name or not slug:
+            messages.error(request, "Name and slug are required.")
+        else:
+            category.name = name
+            category.slug = slug
+            category.gender = gender
+            category.save()
+            messages.success(request, f"Category '{name}' updated successfully.")
+            return redirect('adminpanel:admin_category_list')
+
+    return render(request, 'adminpanel/edit_category.html', {'category': category})
+   
 @login_required
 @user_passes_test(admin_required)
 def order_list(request):

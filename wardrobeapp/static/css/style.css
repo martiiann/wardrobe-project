@@ -247,3 +247,21 @@ section,
     object-fit: cover;
     border-radius: 12px 12px 0 0;
 }
+
+/* Style dropdown items */
+.dropdown-menu {
+  z-index: 3000 !important;
+}
+
+/* Normal dropdown stays hidden until opened */
+.dropdown-menu.category-grid {
+  min-width: 350px;
+  padding: 10px;
+}
+
+/* Apply grid only when opened */
+.dropdown-menu.category-grid.show {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 5px;
+}

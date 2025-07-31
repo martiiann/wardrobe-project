@@ -15,6 +15,10 @@ urlpatterns = [
     path('sizes/add/', views.size_form, name='size_add'),
     path('sizes/<int:size_id>/edit/', views.size_form, name='size_edit'),
     path('sizes/<int:size_id>/delete/', views.size_delete, name='size_delete'),
+    path('categories/', views.admin_category_list, name='admin_category_list'),
+    path('categories/add/', views.admin_add_category, name='admin_add_category'),
+    path('categories/delete/<int:category_id>/', views.admin_delete_category, name='admin_delete_category'),
+    path('categories/<int:category_id>/edit/', views.admin_edit_category, name='admin_edit_category'),
 
     # ✅ New delete product image route
     path('products/images/<int:image_id>/delete/', views.delete_product_image, name='delete_product_image'),

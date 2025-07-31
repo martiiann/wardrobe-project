@@ -22,9 +22,12 @@ def home(request):
 def shop(request):
     categories = Category.objects.all()
     products = Product.objects.filter(is_available=True).order_by('-created_at')
+    gender = "All"
+    
     return render(request, 'products/shop.html', {
         'products': products,
-        'categories': categories
+        'categories': categories,
+        'gender': gender
     })
 
 @require_POST

@@ -19,8 +19,22 @@
     <div class="card-body">
       <p>
         <strong>Status:</strong>
-        <span class="{% if order.is_completed %}text-success{% else %}text-warning{% endif %}">
-          {% if order.is_completed %}Completed{% else %}Pending{% endif %}
+        <span class="
+          {% if order.status == 'Pending' %}text-warning
+          {% elif order.status == 'Processing' %}text-info
+          {% elif order.status == 'Shipped' %}text-primary
+          {% elif order.status == 'Delivered' %}text-success
+          {% endif %}
+        "
+          data-bs-toggle="tooltip"
+          title="
+            {% if order.status == 'Pending' %}Usually 2–3 days for us to process and ship your order.
+            {% elif order.status == 'Processing' %}Your order is being prepared for shipment.
+            {% elif order.status == 'Shipped' %}Your order is on its way! Tracking number will be provided.
+            {% elif order.status == 'Delivered' %}Your order has been delivered. We hope you enjoy your purchase!
+            {% endif %}
+          ">
+          {{ order.status }}
         </span>
       </p>
       <p><strong>Total Paid:</strong> £{{ order.total_price }}</p>
@@ -68,4 +82,14 @@
   </a>
 
 </div>
+
+<!-- Enable Bootstrap Tooltips -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+    new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+});
+</script>
 {% endblock %}

@@ -18,14 +18,30 @@
           <div>
             <strong>Order #{{ order.id }}</strong><br>
             <small>Placed: {{ order.created_at|date:"Y-m-d H:i" }}</small><br>
+            
+            <!-- ✅ Status with tooltip for each stage -->
             <strong>Status:</strong>
-            <span class="{% if order.is_completed %}text-success{% else %}text-warning{% endif %}"
-                  data-bs-toggle="tooltip" data-bs-placement="top"
-                  title="{% if order.is_completed %}Your order has been completed and shipped.{% else %}Usually takes 1–3 days to ship. We’ll notify you once it’s sent.{% endif %}">
-              {% if order.is_completed %}Completed{% else %}Pending{% endif %}
+            <span class="
+              {% if order.status == 'Pending' %}text-warning
+              {% elif order.status == 'Processing' %}text-info
+              {% elif order.status == 'Shipped' %}text-primary
+              {% elif order.status == 'Delivered' %}text-success
+              {% endif %}
+            "
+              data-bs-toggle="tooltip" data-bs-placement="top"
+              title="
+                {% if order.status == 'Pending' %}Usually 2–3 days for us to process and ship your order.
+                {% elif order.status == 'Processing' %}Your order is being prepared for shipment.
+                {% elif order.status == 'Shipped' %}Your order is on its way! Tracking number will be provided.
+                {% elif order.status == 'Delivered' %}Your order has been delivered. We hope you enjoy your purchase!
+                {% endif %}
+              ">
+              {{ order.status }}
             </span>
+
             &nbsp;|&nbsp;
             <strong>Total:</strong> £{{ order.total_price }}
+
             <div class="mt-2">
               {% for item in order.items.all|slice:":3" %}
                 <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
@@ -34,6 +50,7 @@
               {% if order.items.count > 3 %}…{% endif %}
             </div>
           </div>
+
           <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-outline-light btn-sm">View Details</a>
         </li>
       {% endfor %}

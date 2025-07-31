@@ -9,29 +9,51 @@
         {{ gender }}'s Collection{% if selected_category %}: {{ selected_category.name }}{% endif %}
     </h2>
 
-    <!-- 🔍 Search Bar -->
-    <div class="mb-4 text-center">
-        <form method="get" action="" class="d-inline-flex stylish-search-form">
+            <!-- 🔍 Search & Category -->
+    <div class="mb-5">
+    <div class="d-flex justify-content-center flex-wrap gap-2 position-relative" style="z-index: 2000; overflow: visible;">
+
+        <!-- 📂 Category Dropdown -->
+        <div class="dropdown">
+        <button class="btn btn-outline-light dropdown-toggle" type="button"
+                id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
             {% if selected_category %}
-                <input type="hidden" name="category" value="{{ selected_category.slug }}">
+            {{ selected_category.name }}
+            {% else %}
+            All Categories
             {% endif %}
-            <input type="text" name="search" class="form-control form-control-sm stylish-search me-2"
-                   placeholder="Search products..." value="{{ request.GET.search }}">
-            <button class="btn btn-outline-light btn-sm">Search</button>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-dark category-grid" aria-labelledby="categoryDropdown">
+            <li>
+            <a class="dropdown-item {% if not selected_category %}active{% endif %}"
+                href="?{% if gender == 'Men' %}gender=men{% else %}gender=women{% endif %}">
+                All
+            </a>
+            </li>
+            {% for category in categories %}
+            <li>
+                <a class="dropdown-item {% if selected_category and selected_category.slug == category.slug %}active{% endif %}"
+                href="?category={{ category.slug }}">
+                {{ category.name }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        </div>
+
+        <!-- 🔍 Search Form -->
+        <form method="get" action="" class="d-flex align-items-center">
+        {% if selected_category %}
+            <input type="hidden" name="category" value="{{ selected_category.slug }}">
+        {% endif %}
+        <input type="text" name="search" class="form-control form-control-sm me-2"
+                placeholder="Search products..." value="{{ request.GET.search }}">
+        <button class="btn btn-outline-light btn-sm">Search</button>
         </form>
+
+    </div>
     </div>
 
-    <!-- 📂 Category Filter -->
-    <div class="mb-5 text-center category-buttons">
-        <a href="?{% if gender == 'Men' %}gender=men{% else %}gender=women{% endif %}" 
-           class="btn category-btn {% if not selected_category %}active{% endif %} me-2">All</a>
-        {% for category in categories %}
-            <a href="?category={{ category.slug }}" 
-               class="btn category-btn {% if selected_category and selected_category.slug == category.slug %}active{% endif %} me-2">
-                {{ category.name }}
-            </a>
-        {% endfor %}
-    </div>
 
     <!-- 🛍 Product Grid -->
     <div class="row g-4">

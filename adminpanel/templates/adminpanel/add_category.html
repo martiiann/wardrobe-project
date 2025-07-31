@@ -1,0 +1,27 @@
+{% extends 'adminpanel/base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Add Category</h2>
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label">Category Name</label>
+      <input type="text" name="name" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Slug</label>
+      <input type="text" name="slug" class="form-control" required>
+      <small class="text-muted">Example: shirts, jackets, trousers</small>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Gender</label>
+      <select name="gender" class="form-select">
+        <option value="men">Men</option>
+        <option value="women">Women</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-success">Add Category</button>
+    <a href="{% url 'adminpanel:admin_category_list' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}
