@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from products.models import Product, Size
 
+
 class Order(models.Model):
     PAYMENT_METHOD_CHOICES = [
         ('card', 'Card'),
@@ -20,7 +21,7 @@ class Order(models.Model):
 
     full_name = models.CharField(max_length=100)
     email = models.EmailField()
-    guest_token = models.CharField(max_length=64, editable=False, null=True, blank=True)  # ✅ Changed to CharField
+    guest_token = models.CharField(max_length=64, editable=False, null=True, blank=True)
 
     address = models.CharField(max_length=255)
     city = models.CharField(max_length=100)
@@ -43,7 +44,8 @@ class Order(models.Model):
     )
 
     def __str__(self):
-        return f"Order #{self.id} ({self.user.username if self.user else 'Guest'})"
+        size_display = f" (Size: {self.size.name or 'Not specified'})" if self.size else ""
+        return f"{self.quantity} x {self.product.name}{size_display}"
 
     def get_guest_order_url(self):
         from django.urls import reverse
@@ -58,5 +60,5 @@ class OrderItem(models.Model):
     price = models.DecimalField(max_digits=8, decimal_places=2)
 
     def __str__(self):
-        return f"{self.quantity} x {self.product.name}"
- 
+        size_display = f" (Size: {self.size.name})" if self.size else ""
+        return f"{self.quantity} x {self.product.name}{size_display}"

@@ -13,10 +13,11 @@ class Cart:
         return cart if isinstance(cart, dict) else {}
 
     def add(self, product, size=None, quantity=1, override_quantity=False):
-        key = self._generate_key(product.id, size)
-        
+        size_id = int(getattr(size, 'id', 0)) if size else None
+        key = self._generate_key(product.id, size_id)
+
         if key not in self.cart:
-            self.cart[key] = self._new_cart_item(product, size)
+            self.cart[key] = self._new_cart_item(product, size, size_id)
         
         if override_quantity:
             self.cart[key]['quantity'] = quantity
@@ -26,19 +27,16 @@ class Cart:
         self._clean_quantity(key)
         self.save()
 
-    def _generate_key(self, product_id, size):
-        if size is None:
-            return str(product_id)
-        size_code = getattr(size, 'name', str(size))
-        return f"{product_id}_{size_code}"
+    def _generate_key(self, product_id, size_id):
+        return f"{product_id}_{size_id}" if size_id else str(product_id)
 
-    def _new_cart_item(self, product, size):
+    def _new_cart_item(self, product, size, size_id):
         return {
             'quantity': 0,
             'price': str(product.get_current_price()),
-            'size': str(getattr(size, 'name', size)) if size else None,
+            'size': size.name if size else None,
             'product_id': product.id,
-            'size_id': getattr(size, 'id', None),
+            'size_id': size_id,
         }
 
     def _clean_quantity(self, key):
@@ -51,37 +49,35 @@ class Cart:
         cache.delete(f'cart_{self.session.session_key}')
 
     def remove(self, product, size=None):
-        key = self._generate_key(product.id, size)
+        size_id = int(getattr(size, 'id', 0)) if size else None
+        key = self._generate_key(product.id, size_id)
         if key in self.cart:
             del self.cart[key]
             self.save()
 
     def __iter__(self):
         product_ids = {item.get('product_id') for item in self.cart.values() if item.get('product_id')}
-        
-        # Get all size_ids that exist and are not None
-        size_ids = {item.get('size_id') for item in self.cart.values() 
-                   if item.get('size_id') is not None}
-        
+        size_ids = {item.get('size_id') for item in self.cart.values() if item.get('size_id')}
+
         products = Product.objects.filter(id__in=product_ids).in_bulk() if product_ids else {}
         sizes = Size.objects.filter(id__in=size_ids).in_bulk() if size_ids else {}
-        
+
         for item in self.cart.values():
             product = products.get(item.get('product_id'))
             if not product:
                 continue
-                
+
             size_obj = sizes.get(item.get('size_id')) if item.get('size_id') else None
-            
+
             yield {
                 'product': product,
-                'size': item.get('size'),
+                'size': size_obj.name if size_obj else "Not specified",
                 'size_obj': size_obj,
                 'quantity': item.get('quantity', 0),
                 'price': Decimal(item.get('price', 0)),
                 'total_price': Decimal(item.get('price', 0)) * item.get('quantity', 0),
                 'product_id': item.get('product_id'),
-                'key': self._generate_key(item.get('product_id'), item.get('size'))
+                'key': self._generate_key(item.get('product_id'), item.get('size_id'))
             }
 
     def __len__(self):
@@ -94,11 +90,11 @@ class Cart:
         )
 
     def get_product_quantity(self, product, size=None):
-        key = self._generate_key(product.id, size)
+        size_id = int(getattr(size, 'id', 0)) if size else None
+        key = self._generate_key(product.id, size_id)
         return self.cart.get(key, {}).get('quantity', 0)
     
     def clear(self):
-        """Clear the cart session."""
         self.cart = {}
         self.session[settings.CART_SESSION_ID] = self.cart
         self.session.modified = True

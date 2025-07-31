@@ -7,8 +7,8 @@
   <div class="card mb-4">
     <div class="card-body">
       <h5>Customer Info</h5>
-      <p><strong>User:</strong> {{ order.user.username }}</p>
-      <p><strong>Email:</strong> {{ order.user.email }}</p>
+      <p><strong>User:</strong> {{ order.user.username|default:"Guest" }}</p>
+      <p><strong>Email:</strong> {{ order.user.email|default:order.email }}</p>
       <p><strong>Address:</strong> {{ order.address }}</p>
     </div>
   </div>
@@ -30,14 +30,18 @@
           {% for item in order_items %}
           <tr>
             <td>{{ item.product.name }}</td>
-            <td>{{ item.size }}</td>
+            <td>{{ item.size.name|default_if_none:"Not specified" }}</td>
             <td>{{ item.quantity }}</td>
-            <td>${{ item.price }}</td>
+            <td>£{{ item.price }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="text-center">No items found for this order.</td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
-      <h5 class="text-end">Total: ${{ order.total_price }}</h5>
+      <h5 class="text-end">Total: £{{ order.total_price }}</h5>
     </div>
   </div>
 

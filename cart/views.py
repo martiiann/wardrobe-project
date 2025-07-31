@@ -9,26 +9,28 @@ def cart_detail(request):
     cart = Cart(request)
     return render(request, 'cart/cart_detail.html', {'cart': cart})
 
-def cart_add(request, product_id, size=None):
+def cart_add(request, product_id):
     cart = Cart(request)
     product = get_object_or_404(Product, id=product_id)
-    
+
     if request.method == 'POST':
         quantity = int(request.POST.get('quantity', 1))
         
+        size_id = request.POST.get('size')  # ✅ Read size from POST
+        size_obj = None
+        if size_id:
+            try:
+                size_obj = Size.objects.get(id=size_id)
+            except Size.DoesNotExist:
+                size_obj = None
+
         if quantity > 0:
-            cart.add(product, size, quantity)
+            cart.add(product, size_obj, quantity)  # ✅ Pass Size object
+            messages.success(request, f"{product.name} (Size: {size_obj.name if size_obj else 'Not specified'}) added to cart.")
         else:
-            # Handle quantity reduction
-            key = cart._generate_key(product.id, size)
-            current_qty = cart.cart.get(key, {}).get('quantity', 0)
-            new_qty = max(0, current_qty + quantity)
-            
-            if new_qty > 0:
-                cart.add(product, size, quantity)
-            else:
-                cart.remove(product, size)
-    
+            cart.remove(product, size_obj)
+            messages.info(request, f"{product.name} removed from cart.")
+
     return redirect('cart:detail')
 
 def cart_remove(request, product_id, size=None):
