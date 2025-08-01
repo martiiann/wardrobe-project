@@ -21,7 +21,7 @@
                     </thead>
                     <tbody>
                         {% for item in cart %}
-                        <tr>
+                        <tr data-row-id="{{ item.key }}">
                             <td>
                                 <a href="{{ item.product.get_absolute_url }}?from_cart=true" class="text-white text-decoration-none">
                                     {{ item.product.name|default:"Unknown Product" }}
@@ -29,12 +29,9 @@
                             </td>
                             <td>{{ item.size|default:"-" }}</td>
                             <td>
-                                <form action="{% if item.size %}
-                                                  {% url 'cart:add' item.product_id item.size %}
-                                              {% else %}
-                                                  {% url 'cart:add' item.product_id %}
-                                              {% endif %}" method="post" class="d-inline">
+                                <form action="{% url 'cart:add' item.product_id %}" method="post" class="d-inline">
                                     {% csrf_token %}
+                                    <input type="hidden" name="size" value="{{ item.size_obj.id }}">
                                     <div class="input-group" style="width: 120px;">
                                         <button type="submit" name="quantity" value="-1" class="btn btn-outline-light btn-sm">-</button>
                                         <span class="input-group-text bg-dark text-white border-light">{{ item.quantity }}</span>
@@ -43,17 +40,12 @@
                                 </form>
                             </td>
                             <td>€{{ item.price|floatformat:2 }}</td>
-                            <td>€{{ item.total_price|floatformat:2 }}</td>
+                            <td class="item-total">€{{ item.total_price|floatformat:2 }}</td>
                             <td>
-                                <a href="{% if item.size %}
-                                             {% url 'cart:remove' item.product_id item.size %}
-                                         {% else %}
-                                             {% url 'cart:remove' item.product_id %}
-                                         {% endif %}"
-                                   class="btn btn-sm btn-danger"
-                                   onclick="return confirm('Remove this item from your cart?')">
+                                <button class="btn btn-sm btn-danger remove-item"
+                                        data-url="{% url 'cart:remove' item.product_id item.size_obj.id %}">
                                     Remove
-                                </a>
+                                </button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -66,11 +58,11 @@
                 <h4 class="mb-3 text-center">Order Summary</h4>
                 <div class="d-flex justify-content-between mb-2">
                     <span>Subtotal:</span>
-                    <span>€{{ cart.get_total_price|floatformat:2 }}</span>
+                    <span id="cart-total">€{{ cart.get_total_price|floatformat:2 }}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-3">
                     <span>Total Items:</span>
-                    <span>{{ cart|length }}</span>
+                    <span id="cart-items">{{ cart|length }}</span>
                 </div>
                 <a href="{% url 'orders:checkout' %}" class="btn btn-success btn-lg w-100 mb-2">Proceed to Checkout</a>
                 <a href="{% url 'products:product_list' %}" class="btn btn-outline-light w-100">Continue Shopping</a>
@@ -91,4 +83,34 @@
 </div>
 {% endif %}
 </div>
+
+<!-- ✅ Remove Item Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.remove-item').forEach(button => {
+        button.addEventListener('click', function () {
+            const url = this.dataset.url;
+            const row = this.closest('tr');
+            fetch(url, {
+                method: 'POST',
+                headers: { 
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    row.remove();
+                    document.getElementById('cart-total').textContent = `€${parseFloat(data.cart_total_price).toFixed(2)}`;
+                    document.getElementById('cart-items').textContent = data.cart_total_items;
+                    const cartCountEl = document.getElementById('cart-count');
+                    if (cartCountEl) cartCountEl.textContent = data.cart_count;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+});
+</script>
 {% endblock %}

@@ -17,6 +17,7 @@
   <div class="card bg-dark text-white mb-4 shadow-sm w-100" style="max-width: 800px;">
     <div class="card-header fs-5">Order Info</div>
     <div class="card-body">
+      <!-- ✅ Status with tooltip -->
       <p>
         <strong>Status:</strong>
         <span class="
@@ -26,7 +27,7 @@
           {% elif order.status == 'Delivered' %}text-success
           {% endif %}
         "
-          data-bs-toggle="tooltip"
+          data-bs-toggle="tooltip" data-bs-placement="top"
           title="
             {% if order.status == 'Pending' %}Usually 2–3 days for us to process and ship your order.
             {% elif order.status == 'Processing' %}Your order is being prepared for shipment.
@@ -38,6 +39,81 @@
         </span>
       </p>
       <p><strong>Total Paid:</strong> £{{ order.total_price }}</p>
+    </div>
+  </div>
+
+  <!-- Amazon-Style Order Progress Tracker -->
+  <div class="my-4 w-100" style="max-width: 800px;">
+    <div class="d-flex justify-content-between position-relative" style="height: 50px;">
+
+      <!-- Progress Line -->
+      <div class="position-absolute top-50 start-0 translate-middle-y w-100" style="height: 8px; background: #444; border-radius: 4px;">
+        <div style="
+          height: 8px;
+          background: linear-gradient(90deg, #0dcaf0, #0d6efd, #198754);
+          width:
+            {% if order.status == 'Pending' %}25%
+            {% elif order.status == 'Processing' %}50%
+            {% elif order.status == 'Shipped' %}75%
+            {% elif order.status == 'Delivered' %}100%
+            {% endif %};
+          border-radius: 4px;
+          transition: width 0.8s ease;">
+        </div>
+      </div>
+
+      <!-- Pending -->
+      <div class="position-relative text-center" style="width: 25%;">
+        <div class="rounded-circle mx-auto mb-1 
+            {% if order.status == 'Pending' %}current-step{% endif %}
+            {% if order.status == 'Pending' or order.status == 'Processing' or order.status == 'Shipped' or order.status == 'Delivered' %}
+                bg-success
+            {% else %}
+                bg-secondary
+            {% endif %}">
+        </div>
+        <small>Pending</small>
+      </div>
+
+      <!-- Processing -->
+      <div class="position-relative text-center" style="width: 25%;">
+        <div class="rounded-circle mx-auto mb-1 
+            {% if order.status == 'Processing' %}current-step{% endif %}
+            {% if order.status == 'Processing' or order.status == 'Shipped' or order.status == 'Delivered' %}
+                bg-success
+            {% else %}
+                bg-secondary
+            {% endif %}">
+        </div>
+        <small>Processing</small>
+      </div>
+
+      <!-- Shipped -->
+      <div class="position-relative text-center" style="width: 25%;">
+        <div class="rounded-circle mx-auto mb-1 
+            {% if order.status == 'Shipped' %}current-step{% endif %}
+            {% if order.status == 'Shipped' or order.status == 'Delivered' %}
+                bg-success
+            {% else %}
+                bg-secondary
+            {% endif %}">
+        </div>
+        <small>Shipped</small>
+      </div>
+
+      <!-- Delivered -->
+      <div class="position-relative text-center" style="width: 25%;">
+        <div class="rounded-circle mx-auto mb-1 
+            {% if order.status == 'Delivered' %}current-step{% endif %}
+            {% if order.status == 'Delivered' %}
+                bg-success
+            {% else %}
+                bg-secondary
+            {% endif %}">
+        </div>
+        <small>Delivered</small>
+      </div>
+
     </div>
   </div>
 
@@ -82,14 +158,14 @@
   </a>
 
 </div>
+{% endblock %}
 
-<!-- Enable Bootstrap Tooltips -->
+{% block extra_scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-  tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-    new bootstrap.Tooltip(tooltipTriggerEl);
+  document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+      new bootstrap.Tooltip(el);
+    });
   });
-});
 </script>
 {% endblock %}

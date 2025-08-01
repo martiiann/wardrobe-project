@@ -25,14 +25,28 @@ def product_list(request):
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
 
-    # ✅ Store "came from cart" info in session
+    # ✅ Detect if came from cart
     from_cart = request.GET.get('from_cart') == 'true'
     if from_cart:
         request.session['from_cart'] = True
     else:
         request.session.pop('from_cart', None)
 
+    # ✅ Detect if came from order
+    from_order = request.GET.get('from_order')
+    if from_order:
+        request.session['from_order'] = from_order
+    else:
+        request.session.pop('from_order', None)
+
+    # ✅ Store previous page for Continue Shopping
+    referer = request.META.get('HTTP_REFERER')
+    if referer and 'product_detail' not in referer:
+        request.session['prev_page'] = referer
+
     return render(request, 'products/product_detail.html', {
         'product': product,
-        'from_cart': request.session.get('from_cart', False)
+        'from_cart': request.session.get('from_cart', False),
+        'from_order': request.session.get('from_order', None),
+        'prev_page': request.session.get('prev_page')
     })

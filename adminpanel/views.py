@@ -45,6 +45,27 @@ def admin_add_category(request):
 
 @login_required
 @user_passes_test(admin_required)
+def admin_delete_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    order.delete()
+    messages.success(request, f"Order #{order_id} has been deleted successfully.")
+    return redirect('adminpanel:admin_order_list')
+
+@login_required
+@user_passes_test(admin_required)
+def admin_bulk_delete_orders(request):
+    if request.method == 'POST':
+        order_ids = request.POST.getlist('order_ids')
+        if order_ids:
+            Order.objects.filter(id__in=order_ids).delete()
+            messages.success(request, f"Deleted {len(order_ids)} order(s) successfully.")
+        else:
+            messages.warning(request, "No orders selected.")
+    return redirect('adminpanel:admin_order_list')
+
+
+@login_required
+@user_passes_test(admin_required)
 def admin_delete_category(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     category.delete()

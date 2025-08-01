@@ -19,6 +19,8 @@ urlpatterns = [
     path('categories/add/', views.admin_add_category, name='admin_add_category'),
     path('categories/delete/<int:category_id>/', views.admin_delete_category, name='admin_delete_category'),
     path('categories/<int:category_id>/edit/', views.admin_edit_category, name='admin_edit_category'),
+    path('orders/<int:order_id>/delete/', views.admin_delete_order, name='admin_delete_order'),
+    path('orders/bulk-delete/', views.admin_bulk_delete_orders, name='admin_bulk_delete_orders'),
 
     # ✅ New delete product image route
     path('products/images/<int:image_id>/delete/', views.delete_product_image, name='delete_product_image'),

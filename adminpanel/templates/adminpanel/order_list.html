@@ -2,31 +2,53 @@
 {% block content %}
 <div class="container mt-5">
   <h2 class="mb-4">All Orders</h2>
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>Order ID</th>
-        <th>User</th>
-        <th>Total</th>
-        <th>Status</th>
-        <th>Tracking #</th>
-        <th>Placed</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for order in orders %}
-      <tr>
-        <td>{{ order.id }}</td>
-        <td>{{ order.user.username }}</td>
-        <td>${{ order.total_price }}</td>
-        <td>{{ order.status }}</td>
-        <td>{{ order.tracking_number|default:"-" }}</td>
-        <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
-        <td><a href="{% url 'adminpanel:admin_order_detail' order.id %}" class="btn btn-sm btn-outline-primary">Details</a></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+
+  <!-- Bulk Delete Form -->
+  <form method="post" action="{% url 'adminpanel:admin_bulk_delete_orders' %}">
+    {% csrf_token %}
+    <div class="mb-3">
+      <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete selected orders?');">
+        Delete Selected
+      </button>
+    </div>
+
+    <table class="table table-striped table-dark align-middle">
+      <thead>
+        <tr>
+          <th><input type="checkbox" id="select-all"></th>
+          <th>Order ID</th>
+          <th>User</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Tracking #</th>
+          <th>Placed</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr>
+          <td><input type="checkbox" name="order_ids" value="{{ order.id }}"></td>
+          <td>{{ order.id }}</td>
+          <td>{{ order.user.username }}</td>
+          <td>${{ order.total_price }}</td>
+          <td>{{ order.status }}</td>
+          <td>{{ order.tracking_number|default:"-" }}</td>
+          <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
+          <td>
+            <a href="{% url 'adminpanel:admin_order_detail' order.id %}" class="btn btn-sm btn-outline-primary">Details</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </form>
 </div>
+
+<!-- Select All Script -->
+<script>
+  document.getElementById('select-all').addEventListener('change', function() {
+    document.querySelectorAll('input[name="order_ids"]').forEach(cb => cb.checked = this.checked);
+  });
+</script>
 {% endblock %}
