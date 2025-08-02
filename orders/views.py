@@ -14,6 +14,7 @@ from .models import Order, OrderItem
 from cart.cart import Cart
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.core.mail import send_mail
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -263,6 +264,15 @@ def stripe_webhook(request):
         email.attach_alternative(html_message, "text/html")
         email.send()
 
+        # Email notification to admin
+        admin_email = settings.DEFAULT_FROM_EMAIL  # or a dedicated admin address if you have one
+        send_mail(
+            subject=f"New Order #{order.id} Placed",
+            message=f"A new order has been placed.\n\nOrder ID: {order.id}\nCustomer: {order.full_name}\nTotal: £{order.total_price}\nView: {order_url}",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[settings.ADMIN_EMAIL],
+            fail_silently=False,
+        )
     return HttpResponse(status=200)
 
 def success(request):
