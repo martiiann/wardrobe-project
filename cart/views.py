@@ -2,13 +2,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from products.models import Product, Size
 from .cart import Cart
 from django.contrib import messages
+from django.http import JsonResponse
 
 def cart_detail(request):
     """Display the contents of the cart"""
     cart = Cart(request)
     return render(request, 'cart/cart_detail.html', {'cart': cart})
-
-from django.http import JsonResponse
 
 def cart_add(request, product_id):
     cart = Cart(request)
@@ -29,11 +28,25 @@ def cart_add(request, product_id):
         new_qty = current_qty + change
 
         if new_qty > 0:
-            cart.add(product, size_obj, new_qty, override_quantity=True)  # ✅ Adjusts quantity
-            messages.success(request, f"{product.name} quantity updated to {new_qty}.")
+            cart.add(product, size_obj, new_qty, override_quantity=True)
         else:
-            cart.remove(product, size_obj)  # ✅ Removes only if 0 or less
-            messages.info(request, f"{product.name} removed from cart.")
+            cart.remove(product, size_obj)
+
+        # ✅ AJAX response
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            updated_qty = cart.get_product_quantity(product, size_obj)
+            return JsonResponse({
+                'status': 'success',
+                'name': product.name,
+                'image': product.image.url if product.image else '',
+                'price': float(product.get_current_price()),  # unit price
+                'item_quantity': updated_qty,  # ✅ for table quantity update
+                'item_total_price': float(product.get_current_price() * updated_qty),  # ✅ for subtotal update
+                'size': size_obj.name if size_obj else None,
+                'cart_total_price': float(cart.get_total_price()),
+                'cart_total_items': len(cart),
+                'cart_count': cart.count(),
+            })
 
     return redirect('cart:detail')
 

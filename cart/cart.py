@@ -102,3 +102,6 @@ class Cart:
     
     def count(self):
         return sum(item.get('quantity', 0) for item in self.cart.values())
+
+    def __bool__(self):
+        return len(self) > 0

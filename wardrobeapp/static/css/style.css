@@ -355,3 +355,49 @@ section,
 .tracker-delivered .position-absolute > div {
   background: linear-gradient(90deg, #198754, #28a745) !important; /* Greens */
 }
+
+/* Override Bootstrap button styling for prev/next */
+#prev-btn, #next-btn {
+  background: none !important; /* no background */
+  border: none !important;     /* remove border */
+  box-shadow: none !important; /* remove shadow */
+  padding: 0 !important;       /* remove padding */
+  width: auto !important;      /* no fixed width from Bootstrap */
+  height: auto !important;     /* no fixed height */
+  
+  color: white !important;     /* arrow color */
+  font-size: 28px !important;
+  font-weight: bold;
+  line-height: 1;
+  z-index: 10;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  transition: transform 0.2s ease, color 0.3s ease;
+}
+
+/* Hover effect */
+#prev-btn:hover, #next-btn:hover {
+  color: #f8f9fa !important;
+  transform: translateY(-50%) scale(1.2);
+}
+
+/* Positioning outside image */
+#prev-btn {
+  left: -25px !important;
+}
+
+#next-btn {
+  right: -25px !important;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  #prev-btn {
+    left: 5px !important;  /* inside left edge */
+  }
+  #next-btn {
+    right: 5px !important; /* inside right edge */
+  }
+}

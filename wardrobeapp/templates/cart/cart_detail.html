@@ -2,10 +2,10 @@
 {% block title %}Your Cart{% endblock %}
 
 {% block content %}
-<div class="container py-5 text-white text-center">
+<div class="container py-5 text-white text-center cart-container">
     <h2 class="mb-4">Your Shopping Cart</h2>
 
-    {% if cart %}
+    {% if cart|length > 0 %}
         <div class="d-flex flex-column align-items-center">
             <div class="table-responsive w-75">
                 <table class="table table-dark table-striped text-center align-middle">
@@ -29,12 +29,12 @@
                             </td>
                             <td>{{ item.size|default:"-" }}</td>
                             <td>
-                                <form action="{% url 'cart:add' item.product_id %}" method="post" class="d-inline">
+                                <form action="{% url 'cart:add' item.product_id %}" method="post" class="d-inline quantity-form">
                                     {% csrf_token %}
                                     <input type="hidden" name="size" value="{{ item.size_obj.id }}">
                                     <div class="input-group" style="width: 120px;">
                                         <button type="submit" name="quantity" value="-1" class="btn btn-outline-light btn-sm">-</button>
-                                        <span class="input-group-text bg-dark text-white border-light">{{ item.quantity }}</span>
+                                        <span class="input-group-text bg-dark text-white border-light quantity-display">{{ item.quantity }}</span>
                                         <button type="submit" name="quantity" value="1" class="btn btn-outline-light btn-sm">+</button>
                                     </div>
                                 </form>
@@ -53,7 +53,7 @@
                 </table>
             </div>
 
-            <!-- Order Summary Full Width -->
+            <!-- Order Summary -->
             <div class="mt-4 bg-dark p-4 rounded w-75 text-start">
                 <h4 class="mb-3 text-center">Order Summary</h4>
                 <div class="d-flex justify-content-between mb-2">
@@ -69,24 +69,42 @@
             </div>
         </div>
     {% else %}
-<div class="container d-flex justify-content-center align-items-center py-5">
-  <div class="card bg-dark text-white shadow-lg text-center p-4" style="max-width: 500px; width: 100%;">
-    <div class="card-body">
-      <i class="bi bi-cart-x fs-1 text-secondary mb-3"></i>
-      <h4 class="mb-3">Your Cart is Empty</h4>
-      <p class="text-muted mb-4">Looks like you haven’t added anything yet.</p>
-      <a href="{% url 'products:product_list' %}" class="btn btn-success w-100">
-        Browse Products
-      </a>
-    </div>
-  </div>
-</div>
-{% endif %}
+        <div class="container d-flex justify-content-center align-items-center py-5">
+            <div class="card bg-dark text-white shadow-lg text-center p-4" style="max-width: 500px; width: 100%;">
+                <div class="card-body">
+                    <i class="bi bi-cart-x fs-1 text-secondary mb-3"></i>
+                    <h4 class="mb-3">Your Cart is Empty</h4>
+                    <p class="text-muted mb-4">Looks like you haven’t added anything yet.</p>
+                    <a href="{% url 'products:product_list' %}" class="btn btn-success w-100">
+                        Browse Products
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 </div>
 
-<!-- ✅ Remove Item Script -->
+<!-- ✅ Full JS -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+
+    function showEmptyCart() {
+        document.querySelector('.cart-container').innerHTML = `
+            <div class="container d-flex justify-content-center align-items-center py-5">
+              <div class="card bg-dark text-white shadow-lg text-center p-4" style="max-width: 500px; width: 100%;">
+                <div class="card-body">
+                  <i class="bi bi-cart-x fs-1 text-secondary mb-3"></i>
+                  <h4 class="mb-3">Your Cart is Empty</h4>
+                  <p class="text-muted mb-4">Looks like you haven’t added anything yet.</p>
+                  <a href="{% url 'products:product_list' %}" class="btn btn-success w-100">
+                    Browse Products
+                  </a>
+                </div>
+              </div>
+            </div>`;
+    }
+
+    // Remove item
     document.querySelectorAll('.remove-item').forEach(button => {
         button.addEventListener('click', function () {
             const url = this.dataset.url;
@@ -106,11 +124,48 @@ document.addEventListener('DOMContentLoaded', function () {
                     document.getElementById('cart-items').textContent = data.cart_total_items;
                     const cartCountEl = document.getElementById('cart-count');
                     if (cartCountEl) cartCountEl.textContent = data.cart_count;
+                    if (data.cart_total_items === 0) showEmptyCart();
                 }
-            })
-            .catch(error => console.error('Error:', error));
+            });
         });
     });
+
+    // Quantity update
+    document.querySelectorAll('.quantity-form').forEach(form => {
+        form.querySelectorAll('button[type="submit"]').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                formData.set('quantity', this.value);
+
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('cart-total').textContent = `€${parseFloat(data.cart_total_price).toFixed(2)}`;
+                    document.getElementById('cart-items').textContent = data.cart_total_items;
+                    const cartCountEl = document.getElementById('cart-count');
+                    if (cartCountEl) cartCountEl.textContent = data.cart_count;
+
+                    // Update quantity in field
+                    const quantitySpan = form.querySelector('.quantity-display');
+                    quantitySpan.textContent = data.item_quantity;
+
+                    // Update subtotal
+                    const itemRow = form.closest('tr');
+                    if (itemRow && data.item_total_price !== undefined) {
+                        itemRow.querySelector('.item-total').textContent = `€${parseFloat(data.item_total_price).toFixed(2)}`;
+                    }
+
+                    if (data.cart_total_items === 0) showEmptyCart();
+                });
+            });
+        });
+    });
+
 });
 </script>
 {% endblock %}
