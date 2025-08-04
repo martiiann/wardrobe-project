@@ -13,6 +13,7 @@ from django.contrib import messages
 from .forms import UserUpdateForm, ProfileUpdateForm
 from .models import Profile
 from django.db.models import Q
+from django.core.paginator import Paginator 
 
 # Home Page
 def home(request):
@@ -23,9 +24,15 @@ def shop(request):
     categories = Category.objects.all()
     products = Product.objects.filter(is_available=True).order_by('-created_at')
     gender = "All"
+
+    # Add pagination
+    paginator = Paginator(products, 6)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     
     return render(request, 'products/shop.html', {
-        'products': products,
+        'products': page_obj.object_list,
+        'page_obj': page_obj,
         'categories': categories,
         'gender': gender
     })
@@ -73,10 +80,15 @@ def mens_clothing(request):
             Q(name__icontains=search_query) | Q(description__icontains=search_query)
         )
 
+    paginator = Paginator(products, 6)  # Show 6 products per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'products/category_products.html', {
         'gender': 'Men',
         'categories': categories,
-        'products': products,
+        'products': page_obj.object_list,
+        'page_obj': page_obj,
         'selected_category': selected_category,
     })
 
@@ -99,10 +111,15 @@ def womens_clothing(request):
             Q(name__icontains=search_query) | Q(description__icontains=search_query)
         )
 
+    paginator = Paginator(products, 6)  # Show 6 products per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'products/category_products.html', {
         'gender': 'Women',
         'categories': categories,
-        'products': products,
+        'products': page_obj.object_list,
+        'page_obj': page_obj,
         'selected_category': selected_category,
     })
 

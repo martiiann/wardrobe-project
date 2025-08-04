@@ -8,6 +8,9 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.mail import send_mail
 from django.conf import settings
 from django.urls import reverse
+import cloudinary
+from cloudinary.uploader import upload as cloudinary_upload
+from cloudinary.exceptions import Error as CloudinaryError
 
 # ✅ Unified admin check
 def admin_required(user):
@@ -155,7 +158,14 @@ def product_list(request):
 @login_required
 @user_passes_test(admin_required)
 def product_edit(request, product_id=None):
-    from products.models import ProductImage  # ✅ import inline to avoid issues
+    from products.models import ProductImage  
+
+    # ✅ Ensure Cloudinary config
+    cloudinary.config( 
+        cloud_name=settings.CLOUDINARY_STORAGE['CLOUD_NAME'],
+        api_key=settings.CLOUDINARY_STORAGE['API_KEY'],
+        api_secret=settings.CLOUDINARY_STORAGE['API_SECRET']
+    )
 
     if product_id:
         product = get_object_or_404(Product, id=product_id)
@@ -169,14 +179,23 @@ def product_edit(request, product_id=None):
 
             # ✅ Handle multiple images
             for img in request.FILES.getlist('extra_images'):
-                ProductImage.objects.create(product=product, image=img)
+                try:
+                    # Try uploading to Cloudinary
+                    uploaded_image = cloudinary_upload(img)
+                    ProductImage.objects.create(
+                        product=product,
+                        image=uploaded_image['secure_url']
+                    )
+                except CloudinaryError as e:
+                    messages.error(request, f"Image upload failed: {str(e)}")
 
             messages.success(request, 'Product saved successfully!')
             return redirect('adminpanel:product_list')
+        else:
+            messages.error(request, "Please correct the errors in the form.")
     else:
         form = ProductForm(instance=product)
 
-    # ✅ Fetch extra images to show in template
     extra_images = product.images.all() if product else []
 
     return render(request, 'adminpanel/product_form.html', {

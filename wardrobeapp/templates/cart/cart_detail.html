@@ -150,22 +150,29 @@ document.addEventListener('DOMContentLoaded', function () {
                     const cartCountEl = document.getElementById('cart-count');
                     if (cartCountEl) cartCountEl.textContent = data.cart_count;
 
-                    // Update quantity in field
-                    const quantitySpan = form.querySelector('.quantity-display');
-                    quantitySpan.textContent = data.item_quantity;
-
-                    // Update subtotal
                     const itemRow = form.closest('tr');
-                    if (itemRow && data.item_total_price !== undefined) {
-                        itemRow.querySelector('.item-total').textContent = `€${parseFloat(data.item_total_price).toFixed(2)}`;
+
+                    // ✅ If quantity is now 0, remove the row entirely
+                    if (data.item_quantity === 0) {
+                        if (itemRow) itemRow.remove();
+                    } else {
+                        // Update quantity display
+                        const quantitySpan = form.querySelector('.quantity-display');
+                        quantitySpan.textContent = data.item_quantity;
+
+                        // Update subtotal
+                        if (itemRow && data.item_total_price !== undefined) {
+                            itemRow.querySelector('.item-total').textContent = `€${parseFloat(data.item_total_price).toFixed(2)}`;
+                        }
                     }
 
-                    if (data.cart_total_items === 0) showEmptyCart();
+                    // ✅ If cart is empty after this action, show empty cart message
+                    if (data.cart_total_items === 0) {
+                        showEmptyCart();
+                    }
                 });
             });
         });
     });
-
-});
 </script>
 {% endblock %}
