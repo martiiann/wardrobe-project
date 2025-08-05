@@ -8,13 +8,13 @@ class OrderHistoryViewTest(TestCase):
     
     def test_order_history_requires_login(self):
         # User is not logged in → should redirect to login page
-        response = self.client.get(reverse("order_history"))
+        response = self.client.get(reverse("orders:order_history"))
         self.assertEqual(response.status_code, 302)
         self.assertIn("/login", response.url)
     
     def test_order_history_logged_in(self):
         # Log the user in
         self.client.login(username="testuser", password="password123")
-        response = self.client.get(reverse("order_history"))
+        response = self.client.get(reverse("orders:order_history"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "orders/order_history.html")
