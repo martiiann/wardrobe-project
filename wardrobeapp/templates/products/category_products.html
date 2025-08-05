@@ -4,6 +4,11 @@
 {% block content %}
 <div class="container py-5 text-white">
 
+        <!-- 🔙 Back Button -->
+    <a href="{% url 'shop' %}" class="btn btn-outline-light btn-sm mb-3">
+        ← Back to Shop
+    </a>
+
     <!-- 🏷 Page Title -->
     <h2 class="text-center mb-4 stylish-heading">
         {{ gender }}'s Collection{% if selected_category %}: {{ selected_category.name }}{% endif %}
