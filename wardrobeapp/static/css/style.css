@@ -451,3 +451,64 @@ section,
     right: 5px !important; /* inside right edge */
   }
 }
+
+/* 🔄 Custom Pagination Styling */
+.pagination-custom .page-link {
+    background-color: #212529; /* Dark background */
+    color: #fff; /* White text */
+    border: 1px solid #495057; /* Subtle border */
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    margin: 0 3px;
+    transition: all 0.3s ease;
+}
+
+.pagination-custom .page-link:hover {
+    background-color: #198754; /* Bootstrap green */
+    color: #fff;
+    border-color: #198754;
+    box-shadow: 0 0 8px rgba(25, 135, 84, 0.6); /* Glow effect */
+    text-decoration: none;
+}
+
+.pagination-custom .active .page-link {
+    background-color: #198754 !important;
+    border-color: #198754 !important;
+    color: #fff !important;
+    box-shadow: 0 0 8px rgba(25, 135, 84, 0.6);
+    pointer-events: none;
+}
+
+.pagination-custom .disabled .page-link {
+    opacity: 0.5;
+    cursor: not-allowed;
+    color: #fff;
+}
+
+.product-description-box {
+    max-height: 150px;
+    overflow-y: scroll;           /* Always show scrollbar */
+    overflow-x: hidden;           /* Prevent horizontal scroll */
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    border: 1px solid #444;
+    padding: 5px;
+    background-color: transparent;
+    color: inherit;
+}
+
+/* 🌑 Custom scrollbar for Chrome/Safari/Edge */
+.product-description-box::-webkit-scrollbar {
+    width: 6px;
+}
+
+.product-description-box::-webkit-scrollbar-track {
+    background: #212529;
+}
+
+/* Firefox */
+.product-description-box {
+    scrollbar-width: thin;
+    scrollbar-color: #198754 #212529;
+}

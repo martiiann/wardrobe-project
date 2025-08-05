@@ -54,7 +54,9 @@
                 <div>
                     <h2 class="fw-bold mb-3">{{ product.name }}</h2>
                     <p><strong>Category:</strong> {{ product.category.name }}</p>
-                    <p class="small">{{ product.description }}</p>
+                   <div class="product-description-box">
+  {{ product.description }}
+</div>
                     <h3 class="fw-bold mb-3">€{{ product.price }}</h3>
                     <p><strong>Available:</strong>
                         {% if product.is_available %}

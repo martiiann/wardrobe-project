@@ -138,11 +138,46 @@ def create_checkout_session(request):
     if not form.is_valid():
         return JsonResponse({'error': 'Invalid form data', 'details': form.errors}, status=400)
 
-    line_items = []
-    cart_data = []
-    for item in cart:
-        size_id = getattr(item.get('size_obj'), 'id', item.get('size_id'))
+    # 1️⃣ Create order in Pending status before Stripe session
+    order = form.save(commit=False)
+    if request.user.is_authenticated:
+        order.user = request.user
+    else:
+        order.user = None
+        order.guest_token = secrets.token_urlsafe(16)
 
+    order.email = form.cleaned_data['email']
+    order.full_name = form.cleaned_data['full_name']
+    order.total_price = cart.get_total_price()
+    order.status = 'Pending'
+    order.save()
+
+    # Create order items
+    from products.models import Size
+    for item in cart:
+        size_obj = None
+        size_id = getattr(item.get('size_obj'), 'id', item.get('size_id'))
+        if size_id:
+            try:
+                size_obj = Size.objects.get(id=size_id)
+            except Size.DoesNotExist:
+                pass
+
+        OrderItem.objects.create(
+            order=order,
+            product=item['product'],
+            size=size_obj,
+            quantity=item['quantity'],
+            price=item['price']
+        )
+
+    # Store guest token in session (fallback)
+    if order.guest_token:
+        request.session['guest_order_token'] = str(order.guest_token)
+
+    # 2️⃣ Create Stripe session
+    line_items = []
+    for item in cart:
         line_items.append({
             'price_data': {
                 'currency': 'usd',
@@ -151,31 +186,10 @@ def create_checkout_session(request):
             },
             'quantity': item['quantity'],
         })
-        cart_data.append({
-            'product_id': item['product'].id,
-            'quantity': item['quantity'],
-            'price': str(item['price']),
-            'size_id': size_id if size_id else '',
-        })
-
-    guest_token = ''
-    user_id = ''
-    if request.user.is_authenticated:
-        user_id = str(request.user.id)
-    else:
-        guest_token = secrets.token_urlsafe(16)
 
     metadata = {
-        'user_id': user_id,
-        'guest_token': guest_token,
-        'email': form.cleaned_data['email'],
-        'full_name': form.cleaned_data['full_name'],
-        'address': form.cleaned_data['address'],
-        'city': form.cleaned_data['city'],
-        'postal_code': form.cleaned_data['postal_code'],
-        'country': form.cleaned_data['country'],
-        'payment_method': form.cleaned_data['payment_method'],
-        'cart': json.dumps(cart_data),
+        'order_id': str(order.id),  # ✅ store order ID in metadata
+        'guest_token': order.guest_token or '',
     }
 
     success_url = request.build_absolute_uri('/orders/success/') + "?session_id={CHECKOUT_SESSION_ID}"
@@ -283,18 +297,20 @@ def success(request):
     if session_id:
         stripe_session = stripe.checkout.Session.retrieve(session_id)
         metadata = stripe_session.get('metadata', {})
-        user_id = metadata.get('user_id')
-        guest_token = metadata.get('guest_token')
+        order_id = metadata.get('order_id')
 
-        order = Order.objects.filter(
-            user_id=user_id if user_id else None,
-            guest_token=guest_token if guest_token else None
-        ).order_by('-created_at').first()
+        order = None
+        if order_id:
+            order = Order.objects.filter(id=order_id).first()
 
         if order:
             if order.user:
-                return redirect(f"{reverse('orders:order_detail', args=[order.id])}?just_ordered=true")
+                order_url = reverse('orders:order_detail', args=[order.id])
             else:
-                return redirect(f"{order.get_guest_order_url()}?token={order.guest_token}&just_ordered=true")
+                order_url = order.get_guest_order_url()
 
-    return redirect('home')
+            separator = '&' if '?' in order_url else '?'
+            return redirect(f"{order_url}{separator}just_ordered=true")
+
+    messages.warning(request, "We couldn’t find your order, but your payment may have gone through. Please check your email.")
+    return redirect('shop')
