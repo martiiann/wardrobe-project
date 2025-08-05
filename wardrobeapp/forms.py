@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import Profile
 
 
+# Confirmed during TDD to pass register form tests
 # -------------------------
 # User Registration Form
 # -------------------------
