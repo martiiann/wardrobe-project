@@ -1,0 +1,44 @@
+{
+  "tests": [
+    {
+      "name": "Bootstrap Tooltip Init",
+      "status": "pass",
+      "description": "Ensures Bootstrap tooltips initialize correctly on page load."
+    },
+    {
+      "name": "Add to Cart AJAX",
+      "status": "pass",
+      "description": "Checks that items are added to the cart via AJAX without page reload and updates UI elements like cart count and totals."
+    },
+    {
+      "name": "Quantity Update AJAX",
+      "status": "pass",
+      "description": "Verifies that increasing or decreasing item quantity updates item total, cart subtotal, delivery, and grand total live."
+    },
+    {
+      "name": "Remove from Cart AJAX",
+      "status": "pass",
+      "description": "Checks that removing items from cart updates the UI and recalculates totals without page reload."
+    },
+    {
+      "name": "Empty Cart Message",
+      "status": "pass",
+      "description": "Displays an empty cart message when all items are removed via AJAX."
+    },
+    {
+      "name": "Proceed to Checkout Button",
+      "status": "pass",
+      "description": "Validates visibility and correctness of the checkout button and its behavior."
+    },
+    {
+      "name": "Stripe Checkout Session",
+      "status": "pass",
+      "description": "Ensures Stripe checkout session is initiated with correct payload and redirect occurs successfully."
+    },
+    {
+      "name": "Stripe Cancelled Page",
+      "status": "pass",
+      "description": "Displays a cancellation message if payment is cancelled from Stripe."
+    }
+  ]
+}
