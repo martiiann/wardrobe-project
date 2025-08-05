@@ -176,24 +176,38 @@ def create_checkout_session(request):
         request.session['guest_order_token'] = str(order.guest_token)
 
     # 2️⃣ Create Stripe session
+    delivery_fee = cart.get_delivery_fee()
     line_items = []
+
+    # Products
     for item in cart:
         line_items.append({
             'price_data': {
-                'currency': 'usd',
+                'currency': 'eur',
                 'product_data': {'name': item['product'].name},
                 'unit_amount': int(item['price'] * 100),
             },
             'quantity': item['quantity'],
         })
 
+    # Delivery fee as separate line if > 0
+    if delivery_fee > 0:
+        line_items.append({
+            'price_data': {
+                'currency': 'eur',
+                'product_data': {'name': 'Delivery Fee'},
+                'unit_amount': int(delivery_fee * 100),
+            },
+            'quantity': 1,
+        })
+
     metadata = {
-        'order_id': str(order.id),  # ✅ store order ID in metadata
+        'order_id': str(order.id),
         'guest_token': order.guest_token or '',
     }
 
     success_url = request.build_absolute_uri('/orders/success/') + "?session_id={CHECKOUT_SESSION_ID}"
-    cancel_url = request.build_absolute_uri('/cart/')
+    cancel_url = request.build_absolute_uri(reverse('orders:cancelled'))
 
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],

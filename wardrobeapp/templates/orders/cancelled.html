@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Payment Cancelled - Wardrobe{% endblock %}
+
+{% block content %}
+<div class="container py-5 text-white d-flex flex-column align-items-center">
+
+  <!-- Cancelled Alert -->
+  <div class="alert alert-danger alert-dismissible fade show mt-3 w-100" style="max-width: 600px;" role="alert">
+    ❌ Your payment was not completed.<br>
+    Please try again, or contact our support team if you believe this is an error.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  <!-- Retry Button -->
+  <a href="{% url 'cart:detail' %}" class="btn btn-outline-light mt-3">
+    ← Return to Cart
+  </a>
+
+</div>
+{% endblock %}

@@ -3,6 +3,9 @@ from django.conf import settings
 from django.core.cache import cache
 from products.models import Product, Size
 
+DELIVERY_THRESHOLD = Decimal('50.00')
+DELIVERY_FEE = Decimal('5.00')
+
 class Cart:
     def __init__(self, request):
         self.session = request.session
@@ -88,6 +91,16 @@ class Cart:
             Decimal(item.get('price', 0)) * item.get('quantity', 0) 
             for item in self.cart.values()
         )
+
+    def get_delivery_fee(self):
+        """Return delivery fee based on total price."""
+        if self.get_total_price() >= DELIVERY_THRESHOLD:
+            return Decimal('0.00')
+        return DELIVERY_FEE
+
+    def get_total_with_delivery(self):
+        """Return total including delivery."""
+        return self.get_total_price() + self.get_delivery_fee()
 
     def get_product_quantity(self, product, size=None):
         size_id = int(getattr(size, 'id', 0)) if size else None

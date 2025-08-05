@@ -29,34 +29,46 @@
       </p>
     </div>
 
-    <!-- Order Items -->
-    <div class="order-info">
-      <h3>Order Summary</h3>
-      <table>
-        <tr>
-          <th>Item</th><th>Size</th><th>Qty</th><th>Price</th>
-        </tr>
-        {% for item in order.items.all %}
-        <tr>
-          <td style="vertical-align: middle;">
-            <img src="{{ site_url }}{{ item.product.image.url }}" class="item-img" alt="{{ item.product.name }}">
-            {{ item.product.name }}
-          </td>
-          <td style="vertical-align: middle;">{{ item.size.name|default:"-" }}</td>
-          <td style="vertical-align: middle;">{{ item.quantity }}</td>
-          <td style="vertical-align: middle;">£{{ item.price }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="4" style="text-align:center;">No items in this order.</td>
-        </tr>
-        {% endfor %}
-        <tr>
-          <td colspan="3" style="text-align:right;"><strong>Total:</strong></td>
-          <td><strong>£{{ order.total_price }}</strong></td>
-        </tr>
-      </table>
-    </div>
+  <!-- Order Items -->
+  <div class="order-info">
+    <h3>Order Summary</h3>
+    <table>
+      <tr>
+        <th>Item</th><th>Size</th><th>Qty</th><th>Price</th>
+      </tr>
+      {% for item in order.items.all %}
+      <tr>
+        <td style="vertical-align: middle;">
+          <img src="{{ site_url }}{{ item.product.image.url }}" class="item-img" alt="{{ item.product.name }}">
+          {{ item.product.name }}
+        </td>
+        <td style="vertical-align: middle;">{{ item.size.name|default:"-" }}</td>
+        <td style="vertical-align: middle;">{{ item.quantity }}</td>
+        <td style="vertical-align: middle;">£{{ item.price|floatformat:2 }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4" style="text-align:center;">No items in this order.</td>
+      </tr>
+      {% endfor %}
+      <!-- Delivery -->
+      <tr>
+        <td colspan="3" style="text-align:right;"><strong>Delivery:</strong></td>
+        <td>
+          {% if order.get_delivery_fee == 0 %}
+            Free
+          {% else %}
+            £{{ order.get_delivery_fee|floatformat:2 }}
+          {% endif %}
+        </td>
+      </tr>
+      <!-- Total -->
+      <tr>
+        <td colspan="3" style="text-align:right;"><strong>Total:</strong></td>
+        <td><strong>£{{ order.get_total_with_delivery|floatformat:2 }}</strong></td>
+      </tr>
+    </table>
+  </div>
 
     <!-- Shipping Info -->
     <div class="shipping">

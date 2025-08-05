@@ -53,21 +53,48 @@
                 </table>
             </div>
 
-            <!-- Order Summary -->
-            <div class="mt-4 bg-dark p-4 rounded w-75 text-start">
-                <h4 class="mb-3 text-center">Order Summary</h4>
-                <div class="d-flex justify-content-between mb-2">
-                    <span>Subtotal:</span>
-                    <span id="cart-total">€{{ cart.get_total_price|floatformat:2 }}</span>
-                </div>
-                <div class="d-flex justify-content-between mb-3">
-                    <span>Total Items:</span>
-                    <span id="cart-items">{{ cart|length }}</span>
-                </div>
-                <a href="{% url 'orders:checkout' %}" class="btn btn-success btn-lg w-100 mb-2">Proceed to Checkout</a>
-                <a href="{% url 'products:product_list' %}" class="btn btn-outline-light w-100">Continue Shopping</a>
-            </div>
-        </div>
+<!-- Order Summary -->
+<div class="mt-4 bg-dark p-4 rounded w-75 text-start">
+    <h4 class="mb-3 text-center">Order Summary</h4>
+
+    <!-- Subtotal -->
+    <div class="d-flex justify-content-between mb-2">
+        <span>Subtotal:</span>
+        <span id="cart-subtotal">€{{ cart.get_total_price|floatformat:2 }}</span>
+    </div>
+
+    <!-- Delivery -->
+    <div class="d-flex justify-content-between mb-2">
+        <span>Delivery:</span>
+        <span id="cart-delivery" class="{% if cart.get_delivery_fee == 0 %}text-success{% endif %}">
+            {% if cart.get_delivery_fee == 0 %}
+                Free (Orders over €50)
+            {% else %}
+                €{{ cart.get_delivery_fee|floatformat:2 }}
+            {% endif %}
+        </span>
+    </div>
+
+    <!-- Total -->
+    <div class="d-flex justify-content-between mb-3">
+        <strong>Total:</strong>
+        <strong id="cart-total">€{{ cart.get_total_with_delivery|floatformat:2 }}</strong>
+    </div>
+
+    <!-- Items count -->
+    <div class="d-flex justify-content-between mb-3">
+        <span>Total Items:</span>
+        <span id="cart-items">{{ cart|length }}</span>
+    </div>
+
+    <!-- Free delivery note -->
+    <p class="text-light small mb-3">
+        🚚 Free delivery on orders over €50
+    </p>
+
+    <a href="{% url 'orders:checkout' %}" class="btn btn-success btn-lg w-100 mb-2">Proceed to Checkout</a>
+    <a href="{% url 'products:product_list' %}" class="btn btn-outline-light w-100">Continue Shopping</a>
+</div>
     {% else %}
         <div class="container d-flex justify-content-center align-items-center py-5">
             <div class="card bg-dark text-white shadow-lg text-center p-4" style="max-width: 500px; width: 100%;">
@@ -120,8 +147,31 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(data => {
                 if (data.status === 'success') {
                     row.remove();
-                    document.getElementById('cart-total').textContent = `€${parseFloat(data.cart_total_price).toFixed(2)}`;
                     document.getElementById('cart-items').textContent = data.cart_total_items;
+
+                    // ✅ Update subtotal
+                    const subtotalEl = document.querySelector('#cart-subtotal');
+                    if (subtotalEl) {
+                        subtotalEl.textContent = `€${parseFloat(data.cart_total_price).toFixed(2)}`;
+                    }
+
+                    // ✅ Update delivery
+                    if (data.cart_delivery_fee !== undefined) {
+                        const deliverySpan = document.querySelector('#cart-delivery');
+                        if (deliverySpan) {
+                            deliverySpan.textContent = data.cart_delivery_fee === 0 ? 
+                                'Free (Orders over €50)' : `€${parseFloat(data.cart_delivery_fee).toFixed(2)}`;
+                        }
+                    }
+
+                    // ✅ Update total with delivery
+                    if (data.cart_total_with_delivery !== undefined) {
+                        const totalEl = document.querySelector('#cart-total');
+                        if (totalEl) {
+                            totalEl.textContent = `€${parseFloat(data.cart_total_with_delivery).toFixed(2)}`;
+                        }
+                    }
+
                     const cartCountEl = document.getElementById('cart-count');
                     if (cartCountEl) cartCountEl.textContent = data.cart_count;
                     if (data.cart_total_items === 0) showEmptyCart();
@@ -145,8 +195,31 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('cart-total').textContent = `€${parseFloat(data.cart_total_price).toFixed(2)}`;
                     document.getElementById('cart-items').textContent = data.cart_total_items;
+
+                    // ✅ Update subtotal
+                    const subtotalEl = document.querySelector('#cart-subtotal');
+                    if (subtotalEl) {
+                        subtotalEl.textContent = `€${parseFloat(data.cart_total_price).toFixed(2)}`;
+                    }
+
+                    // ✅ Update delivery
+                    if (data.cart_delivery_fee !== undefined) {
+                        const deliverySpan = document.querySelector('#cart-delivery');
+                        if (deliverySpan) {
+                            deliverySpan.textContent = data.cart_delivery_fee === 0 ? 
+                                'Free (Orders over €50)' : `€${parseFloat(data.cart_delivery_fee).toFixed(2)}`;
+                        }
+                    }
+
+                    // ✅ Update total with delivery
+                    if (data.cart_total_with_delivery !== undefined) {
+                        const totalEl = document.querySelector('#cart-total');
+                        if (totalEl) {
+                            totalEl.textContent = `€${parseFloat(data.cart_total_with_delivery).toFixed(2)}`;
+                        }
+                    }
+
                     const cartCountEl = document.getElementById('cart-count');
                     if (cartCountEl) cartCountEl.textContent = data.cart_count;
 
@@ -174,5 +247,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
+});
 </script>
 {% endblock %}

@@ -513,3 +513,32 @@ section,
     scrollbar-color: #198754 #212529;
 }
 
+@media (max-width: 768px) {
+    .shop-landing {
+        flex-direction: column; /* Stack instead of side by side */
+    }
+    .shop-half {
+        flex: 1 1 100%;         /* Full width */
+        min-height: 250px;      /* Adjust height for mobile */
+    }
+}
+
+@media (max-width: 768px) {
+    table thead {
+        display: none;
+    }
+    table tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid #444;
+        padding: 10px;
+        border-radius: 5px;
+        background: rgba(0,0,0,0.4);
+    }
+    table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 0;
+        border: none;
+    }
+}

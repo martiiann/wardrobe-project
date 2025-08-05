@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from products.models import Product, Size
-
+from decimal import Decimal
 
 class Order(models.Model):
     PAYMENT_METHOD_CHOICES = [
@@ -15,6 +15,9 @@ class Order(models.Model):
         ('Shipped', 'Shipped'),
         ('Delivered', 'Delivered'),
     ]
+
+    DELIVERY_THRESHOLD = Decimal('50.00')
+    DELIVERY_FEE = Decimal('5.00')
 
     # 🔹 User can be null for guest checkout
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
@@ -50,6 +53,14 @@ class Order(models.Model):
     def get_guest_order_url(self):
         from django.urls import reverse
         return f"{reverse('orders:guest_order_detail', args=[self.id, self.guest_token])}"
+
+    def get_delivery_fee(self):
+        """Calculate delivery fee based on order total."""
+        return Decimal('0.00') if self.total_price >= self.DELIVERY_THRESHOLD else self.DELIVERY_FEE
+
+    def get_total_with_delivery(self):
+        """Total including delivery."""
+        return self.total_price + self.get_delivery_fee()
 
 
 class OrderItem(models.Model):

@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from django.views.generic import TemplateView
 
 app_name = 'orders'
 
@@ -11,4 +12,5 @@ urlpatterns = [
     path('checkout/create-session/', views.create_checkout_session, name='create_checkout_session'),
     path('success/', views.success, name='payment_success'),
     path('webhook/', views.stripe_webhook, name='stripe-webhook'),
+    path('cancelled/', TemplateView.as_view(template_name="orders/cancelled.html"), name="cancelled"),
 ]

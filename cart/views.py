@@ -44,6 +44,8 @@ def cart_add(request, product_id):
                 'item_total_price': float(product.get_current_price() * updated_qty),  # ✅ for subtotal update
                 'size': size_obj.name if size_obj else None,
                 'cart_total_price': float(cart.get_total_price()),
+                'cart_delivery_fee': float(cart.get_delivery_fee()),  # ✅ ADDED
+                'cart_total_with_delivery': float(cart.get_total_with_delivery()),  # ✅ ADDED
                 'cart_total_items': len(cart),
                 'cart_count': cart.count(),
             })
@@ -70,10 +72,13 @@ def cart_remove(request, product_id, size=None):
         return JsonResponse({
             'status': 'success',
             'message': message,
-            'cart_total_price': cart.get_total_price(),
+            'cart_total_price': float(cart.get_total_price()),
+            'cart_delivery_fee': float(cart.get_delivery_fee()),  # ✅ ADDED
+            'cart_total_with_delivery': float(cart.get_total_with_delivery()),  # ✅ ADDED
             'cart_total_items': len(cart),
             'cart_count': cart.count(),
         })
+
 
     messages.success(request, message)
     return redirect('cart:detail')
@@ -93,5 +98,17 @@ def cart_update(request, product_id, size=None):
     if request.method == 'POST':
         quantity = int(request.POST.get('quantity', 1))
         cart.add(product, size_obj, quantity, override_quantity=True)
-    
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'status': 'success',
+                'item_quantity': cart.get_product_quantity(product, size_obj),
+                'item_total_price': float(product.get_current_price() * quantity),
+                'cart_total_price': float(cart.get_total_price()),
+                'cart_delivery_fee': float(cart.get_delivery_fee()),  # ✅ added
+                'cart_total_with_delivery': float(cart.get_total_with_delivery()),  # ✅ added
+                'cart_total_items': len(cart),
+                'cart_count': cart.count(),
+            })
+
     return redirect('cart:detail')
