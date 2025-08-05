@@ -22,18 +22,24 @@ from wardrobeapp import views
 from orders import views as order_views
 
 urlpatterns = [
-    #path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
     path('', include('wardrobeapp.urls')),
     path('shop/', include('products.urls')),
-    path('shop/<str:gender>/<slug:category_slug>/', views.products_by_category, name='products_by_category'),
+    path(
+        'shop/<str:gender>/<slug:category_slug>/',
+        views.products_by_category,
+        name='products_by_category'
+    ),
     path('orders/', include('orders.urls')),
     path('faq/', include(('faq.urls', 'faq'), namespace='faq')),
     path('adminpanel/', include('adminpanel.urls')),
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT
+    )
 
-    # ✅ Custom 403 handler
+# ✅ Custom 403 handler
 handler403 = 'wardrobeapp.views.custom_permission_denied_view'
-

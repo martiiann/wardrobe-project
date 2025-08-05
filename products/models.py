@@ -2,6 +2,7 @@ from django.db import models
 from django.urls import reverse
 from cloudinary.models import CloudinaryField
 
+
 class Category(models.Model):
     name = models.CharField(max_length=100)
     gender = models.CharField(
@@ -17,11 +18,13 @@ class Category(models.Model):
     def __str__(self):
         return f"{self.name} ({self.gender})"
 
+
 class Size(models.Model):
     name = models.CharField(max_length=10)  # e.g., 'S', 'M', 'L', 'XL'
 
     def __str__(self):
         return self.name
+
 
 class Product(models.Model):
     GENDER_CHOICES = [
@@ -41,15 +44,20 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
-    
+
     def get_current_price(self):
         return self.price
 
     def get_absolute_url(self):
         return reverse('product_detail', args=[str(self.id)])
-    
+
+
 class ProductImage(models.Model):
-    product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
+    product = models.ForeignKey(
+        Product,
+        related_name='images',
+        on_delete=models.CASCADE
+    )
     image = CloudinaryField('image', blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 

@@ -4,10 +4,12 @@ from .cart import Cart
 from django.contrib import messages
 from django.http import JsonResponse
 
+
 def cart_detail(request):
     """Display the contents of the cart"""
     cart = Cart(request)
     return render(request, 'cart/cart_detail.html', {'cart': cart})
+
 
 def cart_add(request, product_id):
     cart = Cart(request)
@@ -39,18 +41,23 @@ def cart_add(request, product_id):
                 'status': 'success',
                 'name': product.name,
                 'image': product.image.url if product.image else '',
-                'price': float(product.get_current_price()),  # unit price
-                'item_quantity': updated_qty,  # ✅ for table quantity update
-                'item_total_price': float(product.get_current_price() * updated_qty),  # ✅ for subtotal update
+                'price': float(product.get_current_price()),
+                'item_quantity': updated_qty,
+                'item_total_price': float(
+                    product.get_current_price() * updated_qty
+                ),
                 'size': size_obj.name if size_obj else None,
                 'cart_total_price': float(cart.get_total_price()),
-                'cart_delivery_fee': float(cart.get_delivery_fee()),  # ✅ ADDED
-                'cart_total_with_delivery': float(cart.get_total_with_delivery()),  # ✅ ADDED
+                'cart_delivery_fee': float(cart.get_delivery_fee()),
+                'cart_total_with_delivery': float(
+                    cart.get_total_with_delivery()
+                ),
                 'cart_total_items': len(cart),
                 'cart_count': cart.count(),
             })
 
     return redirect('cart:detail')
+
 
 def cart_remove(request, product_id, size=None):
     """Remove a product (with size) from the cart"""
@@ -66,22 +73,28 @@ def cart_remove(request, product_id, size=None):
 
     cart.remove(product, size_obj)
 
-    message = f"{product.name} (Size: {size_obj.name if size_obj else 'Not specified'}) removed from cart."
+    message = (
+        f"{product.name} "
+        f"(Size: {size_obj.name if size_obj else 'Not specified'}) "
+        "removed from cart."
+    )
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({
             'status': 'success',
             'message': message,
             'cart_total_price': float(cart.get_total_price()),
-            'cart_delivery_fee': float(cart.get_delivery_fee()),  # ✅ ADDED
-            'cart_total_with_delivery': float(cart.get_total_with_delivery()),  # ✅ ADDED
+            'cart_delivery_fee': float(cart.get_delivery_fee()),
+            'cart_total_with_delivery': float(
+                cart.get_total_with_delivery()
+            ),
             'cart_total_items': len(cart),
             'cart_count': cart.count(),
         })
 
-
     messages.success(request, message)
     return redirect('cart:detail')
+
 
 def cart_update(request, product_id, size=None):
     """Update quantity of a product in the cart"""
@@ -103,10 +116,14 @@ def cart_update(request, product_id, size=None):
             return JsonResponse({
                 'status': 'success',
                 'item_quantity': cart.get_product_quantity(product, size_obj),
-                'item_total_price': float(product.get_current_price() * quantity),
+                'item_total_price': float(
+                    product.get_current_price() * quantity
+                ),
                 'cart_total_price': float(cart.get_total_price()),
-                'cart_delivery_fee': float(cart.get_delivery_fee()),  # ✅ added
-                'cart_total_with_delivery': float(cart.get_total_with_delivery()),  # ✅ added
+                'cart_delivery_fee': float(cart.get_delivery_fee()),
+                'cart_total_with_delivery': float(
+                    cart.get_total_with_delivery()
+                ),
                 'cart_total_items': len(cart),
                 'cart_count': cart.count(),
             })

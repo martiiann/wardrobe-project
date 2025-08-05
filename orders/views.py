@@ -1,20 +1,26 @@
-import stripe
 import json
 import secrets
+import stripe
 import uuid
-from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
-from django.core.mail import EmailMultiAlternatives
-from django.contrib.auth import get_user_model
+
 from django.conf import settings
-from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.core.mail import EmailMultiAlternatives, send_mail
+from django.http import (
+    HttpResponse,
+    JsonResponse,
+    HttpResponseForbidden,
+)
+from django.shortcuts import render, redirect, get_object_or_404
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+
 from .forms import CheckoutForm
 from .models import Order, OrderItem
 from cart.cart import Cart
-from django.template.loader import render_to_string
-from django.urls import reverse
-from django.core.mail import send_mail
+
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -29,32 +35,43 @@ def order_history(request):
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id)
 
-    # 🔹 Show success message if redirected right after checkout
     if request.GET.get('just_ordered') == 'true':
-        messages.success(request, f"Your order #{order.id} has been placed successfully!")
+        messages.success(
+            request,
+            f"Your order #{order.id} has been placed successfully!"
+        )
 
-    # Usual permission checks...
     if order.user and request.user.is_authenticated:
         if order.user != request.user:
-            return HttpResponseForbidden("You do not have permission to view this order.")
+            return HttpResponseForbidden(
+                "You do not have permission to view this order."
+            )
     elif not order.user:
         token = request.GET.get('token')
         if not token or str(token) != str(order.guest_token):
-            return HttpResponseForbidden("You do not have permission to view this order.")
+            return HttpResponseForbidden(
+                "You do not have permission to view this order."
+            )
 
     return render(request, 'orders/order_detail.html', {'order': order})
 
-
-from django.conf import settings
 
 def guest_order_detail(request, order_id, token):
-    order = get_object_or_404(Order, id=order_id, guest_token=token, user__isnull=True)
+    order = get_object_or_404(
+        Order,
+        id=order_id,
+        guest_token=token,
+        user__isnull=True
+    )
 
-    # Show success message after checkout
     if request.GET.get('just_ordered') == 'true':
-        messages.success(request, f"Your order #{order.id} has been placed successfully!")
+        messages.success(
+            request,
+            f"Your order #{order.id} has been placed successfully!"
+        )
 
     return render(request, 'orders/order_detail.html', {'order': order})
+
 
 def checkout(request):
     cart = Cart(request)
@@ -68,7 +85,6 @@ def checkout(request):
         if form.is_valid():
             order = form.save(commit=False)
 
-            # Logged in user or guest
             if request.user.is_authenticated:
                 order.user = request.user
             else:
@@ -80,17 +96,21 @@ def checkout(request):
             order.total_price = cart.get_total_price()
             order.save()
 
-            # ✅ Create order items with correct Size instance
             from products.models import Size
             for item in cart:
                 size_obj = None
-                size_id = getattr(item.get('size_obj'), 'id', item.get('size_id'))
+                size_id = getattr(
+                    item.get('size_obj'),
+                    'id',
+                    item.get('size_id')
+                )
 
-                # 🔍 Debug line to see what checkout receives
-                print("DEBUG Checkout item:",
+                print(
+                    "DEBUG Checkout item:",
                     item['product'],
                     "size_id:", size_id,
-                    "size_name:", getattr(item.get('size_obj'), 'name', None))
+                    "size_name:", getattr(item.get('size_obj'), 'name', None)
+                )
 
                 if size_id:
                     try:
@@ -106,22 +126,24 @@ def checkout(request):
                     quantity=item['quantity']
                 )
 
-            # Store guest token in session for redirect
             if order.guest_token:
                 request.session['guest_order_token'] = str(order.guest_token)
 
-            # Clear cart
             cart.clear()
-
             messages.success(request, "Your order has been placed!")
+
             if order.user:
                 return redirect('orders:order_detail', order.id)
             else:
-                return redirect(f"{order.get_guest_order_url()}?token={order.guest_token}&just_ordered=true")
+                return redirect(
+                    f"{order.get_guest_order_url()}?token={order.guest_token}"
+                    "&just_ordered=true"
+                )
     else:
         form = CheckoutForm()
 
     return render(request, 'orders/checkout.html', {'form': form})
+
 
 @csrf_exempt
 def create_checkout_session(request):
@@ -136,9 +158,11 @@ def create_checkout_session(request):
 
     form = CheckoutForm(data)
     if not form.is_valid():
-        return JsonResponse({'error': 'Invalid form data', 'details': form.errors}, status=400)
+        return JsonResponse(
+            {'error': 'Invalid form data', 'details': form.errors},
+            status=400
+        )
 
-    # 1️⃣ Create order in Pending status before Stripe session
     order = form.save(commit=False)
     if request.user.is_authenticated:
         order.user = request.user
@@ -152,7 +176,6 @@ def create_checkout_session(request):
     order.status = 'Pending'
     order.save()
 
-    # Create order items
     from products.models import Size
     for item in cart:
         size_obj = None
@@ -171,15 +194,12 @@ def create_checkout_session(request):
             price=item['price']
         )
 
-    # Store guest token in session (fallback)
     if order.guest_token:
         request.session['guest_order_token'] = str(order.guest_token)
 
-    # 2️⃣ Create Stripe session
     delivery_fee = cart.get_delivery_fee()
     line_items = []
 
-    # Products
     for item in cart:
         line_items.append({
             'price_data': {
@@ -190,7 +210,6 @@ def create_checkout_session(request):
             'quantity': item['quantity'],
         })
 
-    # Delivery fee as separate line if > 0
     if delivery_fee > 0:
         line_items.append({
             'price_data': {
@@ -206,7 +225,10 @@ def create_checkout_session(request):
         'guest_token': order.guest_token or '',
     }
 
-    success_url = request.build_absolute_uri('/orders/success/') + "?session_id={CHECKOUT_SESSION_ID}"
+    success_url = request.build_absolute_uri(
+        '/orders/success/'
+    ) + "?session_id={CHECKOUT_SESSION_ID}"
+
     cancel_url = request.build_absolute_uri(reverse('orders:cancelled'))
 
     session = stripe.checkout.Session.create(
@@ -220,13 +242,18 @@ def create_checkout_session(request):
 
     return JsonResponse({'id': session.id})
 
+
 @csrf_exempt
 def stripe_webhook(request):
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
 
     try:
-        event = stripe.Webhook.construct_event(payload, sig_header, settings.STRIPE_WEBHOOK_SECRET)
+        event = stripe.Webhook.construct_event(
+            payload,
+            sig_header,
+            settings.STRIPE_WEBHOOK_SECRET
+        )
     except Exception:
         return HttpResponse(status=400)
 
@@ -235,9 +262,9 @@ def stripe_webhook(request):
         metadata = session.get('metadata', {})
 
         User = get_user_model()
-        user = User.objects.filter(id=metadata.get('user_id')).first() if metadata.get('user_id') else None
+        user = User.objects.filter(id=metadata.get('user_id')).first() \
+            if metadata.get('user_id') else None
 
-        # Create order
         order = Order.objects.create(
             user=user,
             guest_token=metadata.get('guest_token') if not user else None,
@@ -253,6 +280,7 @@ def stripe_webhook(request):
 
         from products.models import Product, Size
         cart_items = json.loads(metadata.get('cart', '[]'))
+
         for item in cart_items:
             size = None
             if item.get('size_id'):
@@ -262,6 +290,7 @@ def stripe_webhook(request):
                     size = None
 
             product = Product.objects.get(id=item['product_id'])
+
             OrderItem.objects.create(
                 order=order,
                 product=product,
@@ -270,38 +299,51 @@ def stripe_webhook(request):
                 price=item['price'],
             )
 
-        # Email confirmation
-        site_url = settings.SITE_URL if hasattr(settings, 'SITE_URL') else request.build_absolute_uri('/')
+        site_url = settings.SITE_URL if hasattr(
+            settings, 'SITE_URL'
+        ) else request.build_absolute_uri('/')
+
         order_url = f"{site_url}orders/{order.id}/"
         if order.guest_token:
             order_url += f"?token={order.guest_token}"
 
-        html_message = render_to_string('orders/email_confirmation.html', {
-            'order': order,
-            'items': order.items.all(),
-            'order_url': order_url,
-            'site_url': site_url,  # For absolute image URLs
-        })
+        html_message = render_to_string(
+            'orders/email_confirmation.html',
+            {
+                'order': order,
+                'items': order.items.all(),
+                'order_url': order_url,
+                'site_url': site_url,
+            }
+        )
 
         email = EmailMultiAlternatives(
             subject=f"Order Confirmation #{order.id}",
-            body=f"Thank you for your order #{order.id}. View here: {order_url}",
+            body=f"Thank you for your order #{order.id}. "
+                 f"View here: {order_url}",
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[order.email],
         )
         email.attach_alternative(html_message, "text/html")
         email.send()
 
-        # Email notification to admin
-        admin_email = settings.DEFAULT_FROM_EMAIL  # or a dedicated admin address if you have one
+        admin_email = settings.DEFAULT_FROM_EMAIL
         send_mail(
             subject=f"New Order #{order.id} Placed",
-            message=f"A new order has been placed.\n\nOrder ID: {order.id}\nCustomer: {order.full_name}\nTotal: £{order.total_price}\nView: {order_url}",
+            message=(
+                f"A new order has been placed.\n\n"
+                f"Order ID: {order.id}\n"
+                f"Customer: {order.full_name}\n"
+                f"Total: £{order.total_price}\n"
+                f"View: {order_url}"
+            ),
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[settings.ADMIN_EMAIL],
             fail_silently=False,
         )
+
     return HttpResponse(status=200)
+
 
 def success(request):
     cart = Cart(request)
@@ -326,5 +368,9 @@ def success(request):
             separator = '&' if '?' in order_url else '?'
             return redirect(f"{order_url}{separator}just_ordered=true")
 
-    messages.warning(request, "We couldn’t find your order, but your payment may have gone through. Please check your email.")
+    messages.warning(
+        request,
+        "We couldn’t find your order, but your payment may have gone through. "
+        "Please check your email."
+    )
     return redirect('shop')

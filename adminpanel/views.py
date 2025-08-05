@@ -12,20 +12,26 @@ import cloudinary
 from cloudinary.uploader import upload as cloudinary_upload
 from cloudinary.exceptions import Error as CloudinaryError
 
+
 # ✅ Unified admin check
 def admin_required(user):
     return user.is_staff or user.is_superuser
+
 
 @login_required
 @user_passes_test(admin_required)
 def dashboard(request):
     return redirect('adminpanel:admin_order_list')
 
+
 @login_required
 @user_passes_test(admin_required)
 def admin_category_list(request):
     categories = Category.objects.all()
-    return render(request, 'adminpanel/category_list.html', {'categories': categories}) 
+    return render(request, 'adminpanel/category_list.html', {
+        'categories': categories
+    })
+
 
 @login_required
 @user_passes_test(admin_required)
@@ -38,21 +44,33 @@ def admin_add_category(request):
         if not name or not slug:
             messages.error(request, "Name and slug are required.")
         elif Category.objects.filter(slug=slug).exists():
-            messages.error(request, f"A category with slug '{slug}' already exists.")
+            messages.error(
+                request,
+                f"A category with slug '{slug}' already exists."
+            )
         else:
-            Category.objects.create(name=name, slug=slug, gender=gender)
-            messages.success(request, f"Category '{name}' added successfully.")
+            Category.objects.create(
+                name=name, slug=slug, gender=gender
+            )
+            messages.success(
+                request, f"Category '{name}' added successfully."
+            )
             return redirect('adminpanel:admin_category_list')
 
-    return render(request, 'adminpanel/add_category.html')     
+    return render(request, 'adminpanel/add_category.html')
+
 
 @login_required
 @user_passes_test(admin_required)
 def admin_delete_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     order.delete()
-    messages.success(request, f"Order #{order_id} has been deleted successfully.")
+    messages.success(
+        request,
+        f"Order #{order_id} has been deleted successfully."
+    )
     return redirect('adminpanel:admin_order_list')
+
 
 @login_required
 @user_passes_test(admin_required)
@@ -61,7 +79,10 @@ def admin_bulk_delete_orders(request):
         order_ids = request.POST.getlist('order_ids')
         if order_ids:
             Order.objects.filter(id__in=order_ids).delete()
-            messages.success(request, f"Deleted {len(order_ids)} order(s) successfully.")
+            messages.success(
+                request,
+                f"Deleted {len(order_ids)} order(s) successfully."
+            )
         else:
             messages.warning(request, "No orders selected.")
     return redirect('adminpanel:admin_order_list')
@@ -72,8 +93,12 @@ def admin_bulk_delete_orders(request):
 def admin_delete_category(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     category.delete()
-    messages.success(request, f"Category '{category.name}' deleted successfully.")
+    messages.success(
+        request,
+        f"Category '{category.name}' deleted successfully."
+    )
     return redirect('adminpanel:admin_category_list')
+
 
 @login_required
 @user_passes_test(admin_required)
@@ -92,16 +117,24 @@ def admin_edit_category(request, category_id):
             category.slug = slug
             category.gender = gender
             category.save()
-            messages.success(request, f"Category '{name}' updated successfully.")
+            messages.success(
+                request, f"Category '{name}' updated successfully."
+            )
             return redirect('adminpanel:admin_category_list')
 
-    return render(request, 'adminpanel/edit_category.html', {'category': category})
-   
+    return render(request, 'adminpanel/edit_category.html', {
+        'category': category
+    })
+
+
 @login_required
 @user_passes_test(admin_required)
 def order_list(request):
     orders = Order.objects.all().order_by('-created_at')
-    return render(request, 'adminpanel/order_list.html', {'orders': orders})
+    return render(request, 'adminpanel/order_list.html', {
+        'orders': orders
+    })
+
 
 @login_required
 @user_passes_test(admin_required)
@@ -122,25 +155,41 @@ def order_detail(request, order_id):
         # ✅ Always send email if Shipped or Delivered (for testing)
         if order.status in ['Shipped', 'Delivered']:
             print(f"DEBUG: Sending {order.status} email to {order.user.email}")
-            subject = f"Your Order #{order.id} Has Been {order.status}"
+            subject = (
+                f"Your Order #{order.id} Has Been {order.status}"
+            )
             message = (
                 f"Hi {order.user.username},\n\n"
                 f"Your order #{order.id} has been marked as {order.status}.\n"
-                f"Tracking Number: {order.tracking_number or 'Not available'}\n\n"
+                f"Tracking Number: "
+                f"{order.tracking_number or 'Not available'}\n\n"
                 f"You can view your order here: {order_detail_url}\n\n"
                 f"Thank you for shopping with us!"
             )
             try:
-                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [order.user.email])
-                messages.success(request, f"Email sent to {order.user.email}")
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [order.user.email]
+                )
+                messages.success(
+                    request,
+                    f"Email sent to {order.user.email}"
+                )
             except Exception as e:
                 print("ERROR:", e)
-                messages.error(request, f"Failed to send email: {e}")
+                messages.error(
+                    request, f"Failed to send email: {e}"
+                )
         else:
             print("DEBUG: No email sent (status not shipped or delivered)")
 
         messages.success(request, 'Order updated successfully!')
-        return redirect('adminpanel:admin_order_detail', order_id=order.id)
+        return redirect(
+            'adminpanel:admin_order_detail',
+            order_id=order.id
+        )
 
     return render(request, 'adminpanel/order_detail.html', {
         'order': order,
@@ -153,15 +202,18 @@ def order_detail(request, order_id):
 @user_passes_test(admin_required)
 def product_list(request):
     products = Product.objects.all()
-    return render(request, 'adminpanel/product_list.html', {'products': products})
+    return render(request, 'adminpanel/product_list.html', {
+        'products': products
+    })
+
 
 @login_required
 @user_passes_test(admin_required)
 def product_edit(request, product_id=None):
-    from products.models import ProductImage  
+    from products.models import ProductImage
 
     # ✅ Ensure Cloudinary config
-    cloudinary.config( 
+    cloudinary.config(
         cloud_name=settings.CLOUDINARY_STORAGE['CLOUD_NAME'],
         api_key=settings.CLOUDINARY_STORAGE['API_KEY'],
         api_secret=settings.CLOUDINARY_STORAGE['API_SECRET']
@@ -187,12 +239,17 @@ def product_edit(request, product_id=None):
                         image=uploaded_image['secure_url']
                     )
                 except CloudinaryError as e:
-                    messages.error(request, f"Image upload failed: {str(e)}")
+                    messages.error(
+                        request,
+                        f"Image upload failed: {str(e)}"
+                    )
 
             messages.success(request, 'Product saved successfully!')
             return redirect('adminpanel:product_list')
         else:
-            messages.error(request, "Please correct the errors in the form.")
+            messages.error(
+                request, "Please correct the errors in the form."
+            )
     else:
         form = ProductForm(instance=product)
 
@@ -204,6 +261,7 @@ def product_edit(request, product_id=None):
         'extra_images': extra_images
     })
 
+
 @login_required
 @user_passes_test(admin_required)
 def product_delete(request, product_id):
@@ -212,11 +270,15 @@ def product_delete(request, product_id):
     messages.success(request, 'Product deleted.')
     return redirect('adminpanel:product_list')
 
+
 @login_required
 @user_passes_test(admin_required)
 def size_list(request):
     sizes = Size.objects.all()
-    return render(request, 'adminpanel/size_list.html', {'sizes': sizes})
+    return render(request, 'adminpanel/size_list.html', {
+        'sizes': sizes
+    })
+
 
 @login_required
 @user_passes_test(admin_required)
@@ -229,7 +291,11 @@ def size_form(request, size_id=None):
             return redirect('adminpanel:size_list')
     else:
         form = SizeForm(instance=size)
-    return render(request, 'adminpanel/size_form.html', {'form': form, 'size': size})
+    return render(request, 'adminpanel/size_form.html', {
+        'form': form,
+        'size': size
+    })
+
 
 @login_required
 @user_passes_test(admin_required)
@@ -237,6 +303,7 @@ def size_delete(request, size_id):
     size = get_object_or_404(Size, id=size_id)
     size.delete()
     return redirect('adminpanel:size_list')
+
 
 @login_required
 @user_passes_test(admin_required)
