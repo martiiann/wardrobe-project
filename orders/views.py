@@ -24,7 +24,7 @@ from cart.cart import Cart
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-
+# Confirmed working during TDD process
 def order_history(request):
     if not request.user.is_authenticated:
         return redirect('login')
