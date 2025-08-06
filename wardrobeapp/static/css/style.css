@@ -132,43 +132,94 @@ section,
     position: relative;
     z-index: 1;
 }
-
+/* Base Styles cart alert */
 #cart-alert-total,
 #cart-alert-items {
-    color: #c0c0c0 !important;  /* Bright green for totals */
+    color: #c0c0c0 !important;
     font-weight: 600;
     font-size: 14px;
 }
 
 #cart-alert small {
-    color: #fff !important;  /* White text for small details */
+    color: #fff !important;
     font-weight: 500;
     font-size: 13px;
 }
 
 #cart-alert {
-    background-color: rgba(0, 0, 0, 0.9) !important; /* Dark background */
-    color: #fff !important; /* White text */
-    border: 1px solid #c0c0c0 !important; 
+    background-color: rgba(0, 0, 0, 0.9) !important;
+    color: #fff !important;
+    border: 1px solid #c0c0c0 !important;
     border-radius: 10px;
     transform: translateY(-20px);
     opacity: 0;
     transition: transform 0.4s ease, opacity 0.4s ease;
     pointer-events: none;
-}
-
-#cart-alert h6 {
-    color: #fff !important;
-}
-
-#cart-alert p {
-    color: rgba(255,255,255,0.8) !important;
+    /* New responsive positioning */
+    position: fixed;
+    top: 20px;
+    right: 50%;
+    transform: translate(50%, -20px);
+    width: calc(100% - 40px);
+    max-width: 350px;
+    margin: 0 auto;
+    padding: 15px;
+    z-index: 1055;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 #cart-alert.show {
-    transform: translateY(0);
+    transform: translate(50%, 0);
     opacity: 1;
     pointer-events: auto;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+    #cart-alert {
+        width: 90vw;
+        padding: 12px;
+    }
+    
+    #cart-alert .d-flex {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    #cart-alert img {
+        margin-right: 0;
+        margin-bottom: 10px;
+        align-self: center;
+    }
+    
+    #cart-alert .btn {
+        width: 100%;
+        margin-top: 10px;
+    }
+    
+    /* Adjust text sizing for mobile */
+    #cart-alert h6 {
+        font-size: 15px;
+    }
+    
+    #cart-alert p,
+    #cart-alert small {
+        font-size: 12px;
+    }
+}
+
+/* Desktop-specific positioning */
+@media (min-width: 769px) {
+    #cart-alert {
+        right: 20px;
+        left: auto;
+        transform: translateY(-20px);
+        width: 360px;
+    }
+    
+    #cart-alert.show {
+        transform: translateY(0);
+    }
 }
 
 /* Account dropdown */
