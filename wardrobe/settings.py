@@ -11,27 +11,24 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-import os
 from decouple import config
 import dj_database_url
+import os
 import cloudinary
 
-# Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Secret key & debug
+# 🔑 Security
 SECRET_KEY = config('SECRET_KEY')
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-# Allowed hosts
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
-    'needed-lionfish-plainly.ngrok-free.app',
-    'wardrobe-project-2025-a1e1d4253e40.herokuapp.com',  # Heroku domain
+    config('ALLOWED_HOSTS'),
 ]
 
-# Application definition
+# 📦 Installed apps
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -52,7 +49,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # Whitenoise
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -82,19 +79,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'wardrobe.wsgi.application'
 
-# Database (SQLite for local, Postgres on Heroku)
+# 🗄 Database - Heroku Postgres
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=config('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=True
+    )
 }
 
-DATABASE_URL = config("DATABASE_URL", default=None)
-if DATABASE_URL:
-    DATABASES["default"] = dj_database_url.parse(DATABASE_URL)
-
-# Password validation
+# 🔐 Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -102,29 +96,39 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Internationalization
+# 🌍 Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
+# 📂 Static files
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'wardrobeapp/static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# Media (Cloudinary)
+# 🖼 Media & Cloudinary
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': config('CLOUDINARY_API_KEY'),
+    'API_SECRET': config('CLOUDINARY_API_SECRET'),
+}
+cloudinary.config( 
+  cloud_name=config('CLOUDINARY_CLOUD_NAME'),
+  api_key=config('CLOUDINARY_API_KEY'),
+  api_secret=config('CLOUDINARY_API_SECRET')
+)
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Stripe Keys
+# 💳 Stripe
 STRIPE_PUBLIC_KEY = config("STRIPE_PUBLIC_KEY")
 STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY")
 STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET")
+SITE_URL = f"https://{config('ALLOWED_HOSTS')}"
 
-# Email
+# 📧 Email
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -134,35 +138,17 @@ EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
 ADMIN_EMAIL = config("ADMIN_EMAIL")
 
-# Site URL (update to Heroku domain in production)
-SITE_URL = 'https://wardrobe-project-2025-a1e1d4253e40.herokuapp.com'
-
-# Cloudinary config
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': config('CLOUDINARY_API_KEY'),
-    'API_SECRET': config('CLOUDINARY_API_SECRET'),
-}
-
-cloudinary.config( 
-  cloud_name = config('CLOUDINARY_CLOUD_NAME'),
-  api_key = config('CLOUDINARY_API_KEY'),
-  api_secret = config('CLOUDINARY_API_SECRET')
-)
-
-# Auth redirects
+# 🔑 Auth
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/profile/'
 LOGOUT_REDIRECT_URL = '/'
-
-# Cart session
 CART_SESSION_ID = 'cart'
 
-# CSRF trusted origins
+# 🛡 CSRF
 CSRF_TRUSTED_ORIGINS = [
     "https://*.stripe.com",
     "https://*.ngrok-free.app",
-    "https://wardrobe-project-2025-a1e1d4253e40.herokuapp.com"
+    f"https://{config('ALLOWED_HOSTS')}",
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
