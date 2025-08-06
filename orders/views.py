@@ -220,12 +220,17 @@ def create_checkout_session(request):
             'quantity': 1,
         })
 
-    # ✅ Include all required details for webhook email
-    metadata = {
+        # ✅ Include all required details for webhook email
+        metadata = {
         'order_id': str(order.id),
         'guest_token': order.guest_token or '',
         'email': order.email,
         'full_name': order.full_name,
+        'address': form.cleaned_data.get('address', ''),
+        'city': form.cleaned_data.get('city', ''),
+        'postal_code': form.cleaned_data.get('postal_code', ''),
+        'country': form.cleaned_data.get('country', ''),
+        'payment_method': 'card',
         'user_id': str(order.user.id) if order.user else '',
         'cart': json.dumps([
             {
