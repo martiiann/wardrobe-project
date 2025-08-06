@@ -102,10 +102,9 @@
     <h3>Shipping Address</h3>
     <p>
       {{ order.full_name }}<br>
-      {{ order.address_line1 }}<br>
-      {% if order.address_line2 %}{{ order.address_line2 }}<br>{% endif %}
+      {{ order.address }}<br>
       {{ order.city }}<br>
-      {{ order.postcode }}<br>
+      {{ order.postal_code }}<br>
       {{ order.country }}
     </p>
 
