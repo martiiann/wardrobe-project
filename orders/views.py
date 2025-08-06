@@ -255,68 +255,69 @@ def stripe_webhook(request):
             sig_header,
             settings.STRIPE_WEBHOOK_SECRET
         )
-    except Exception:
+    except Exception as e:
         return HttpResponse(status=400)
 
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
         metadata = session.get('metadata', {})
-
         order_id = metadata.get('order_id')
+
         order = Order.objects.filter(id=order_id).first()
+        if not order:
+            return HttpResponse(status=404)
 
-        if order:
-            order.status = "Paid"
-            order.save()
+        order.status = 'Paid'
+        order.save()
 
-            site_url = settings.SITE_URL if hasattr(settings, 'SITE_URL') else request.build_absolute_uri('/')
+        site_url = settings.SITE_URL.rstrip('/') if hasattr(settings, 'SITE_URL') else request.build_absolute_uri('/').rstrip('/')
 
-            # Correct order URL (different for guest and logged-in user)
-            if order.user:
-                order_url = f"{site_url}orders/{order.id}/"
-            else:
-                order_url = f"{site_url}orders/guest/{order.id}/{order.guest_token}/"
+        # Construct proper order URL
+        if order.user:
+            order_url = f"{site_url}/orders/{order.id}/"
+        else:
+            order_url = f"{site_url}/orders/guest/{order.id}/{order.guest_token}/"
 
-            # Make absolute image URLs for HTML email
-            for item in order.items.all():
-                if item.product.image:
-                    item.product.image_url_full = site_url + item.product.image.url
+        # Add absolute image URLs for use in the email template
+        for item in order.items.all():
+            if item.product.image:
+                item.product.image_url_full = f"{site_url}{item.product.image.url}"
 
-            # Render HTML email for user
-            html_message = render_to_string(
-                'orders/email_confirmation.html',
-                {
-                    'order': order,
-                    'items': order.items.all(),
-                    'order_url': order_url,
-                    'site_url': site_url,
-                }
-            )
+        # Render the HTML email
+        html_message = render_to_string(
+            'orders/email_confirmation.html',
+            {
+                'order': order,
+                'items': order.items.all(),
+                'order_url': order_url,
+                'site_url': site_url,
+            }
+        )
 
-            # Send email to user
-            email = EmailMultiAlternatives(
-                subject=f"Order Confirmation #{order.id}",
-                body=f"Thank you for your order #{order.id}. View here: {order_url}",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                to=[order.email],
-            )
-            email.attach_alternative(html_message, "text/html")
-            email.send(fail_silently=False)
+        # Send email to customer
+        email = EmailMultiAlternatives(
+            subject=f"Order Confirmation #{order.id}",
+            body=f"Thank you for your order #{order.id}. You can view it here: {order_url}",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[order.email],
+        )
+        email.attach_alternative(html_message, "text/html")
+        email.send(fail_silently=False)
 
-            # Send email to admin
-            send_mail(
-                subject=f"New Order #{order.id} Placed",
-                message=(
-                    f"A new order has been placed.\n\n"
-                    f"Order ID: {order.id}\n"
-                    f"Customer: {order.full_name}\n"
-                    f"Total: £{order.total_price}\n"
-                    f"View: {order_url}"
-                ),
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[settings.ADMIN_EMAIL],
-                fail_silently=False,
-            )
+        # Send email to admin
+        send_mail(
+            subject=f"New Order #{order.id} Placed",
+            message=(
+                f"A new order has been placed.\n\n"
+                f"Order ID: {order.id}\n"
+                f"Customer: {order.full_name}\n"
+                f"Total: £{order.total_price}\n"
+                f"View: {order_url}"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[settings.ADMIN_EMAIL],
+            fail_silently=False,
+        )
 
     return HttpResponse(status=200)
 
