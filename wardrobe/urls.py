@@ -25,7 +25,7 @@ from orders.views import stripe_webhook
 urlpatterns = [
     # path('admin/', admin.site.urls),
     path('', include('wardrobeapp.urls')),
-    path('shop/', include('products.urls')),
+    path('shop/', include(('products.urls', 'products'), namespace='products')),
     path(
         'shop/<str:gender>/<slug:category_slug>/',
         views.products_by_category,
