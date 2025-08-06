@@ -87,7 +87,7 @@
       </tr>
       {% for item in items %}
       <tr>
-        <td>{{ item.product_name }}</td>
+        <td>{{ item.product.name }}</td>
         <td>{{ item.size }}</td>
         <td>{{ item.quantity }}</td>
         <td>£{{ item.price }}</td>
@@ -102,6 +102,7 @@
     <div class="footer">
       <p>View your order: <a href="{{ order_url }}">{{ order_url }}</a></p>
       <p>We'll notify you when your order ships.</p>
+      <p style="margin-top: 20px;">– The Wardrobe Team</p>
     </div>
   </div>
 </body>
