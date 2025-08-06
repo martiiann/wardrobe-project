@@ -36,13 +36,15 @@
         <tr>
           <th>Item</th><th>Size</th><th>Qty</th><th>Price</th>
         </tr>
-        {% for item in order.items.all %}
+        {% for item in items %}
         <tr>
           <td style="vertical-align: middle;">
-            <img src="{{ item.product.image_url_full }}" class="item-img" alt="{{ item.product.name }}">
-            {{ item.product.name }}
+            {% if item.image_url_full %}
+              <img src="{{ item.image_url_full }}" class="item-img" alt="{{ item.product_name }}">
+            {% endif %}
+            {{ item.product_name }}
           </td>
-          <td style="vertical-align: middle;">{{ item.size.name|default:"-" }}</td>
+          <td style="vertical-align: middle;">{{ item.size }}</td>
           <td style="vertical-align: middle;">{{ item.quantity }}</td>
           <td style="vertical-align: middle;">£{{ item.price|floatformat:2 }}</td>
         </tr>
@@ -51,6 +53,7 @@
           <td colspan="4" style="text-align:center;">No items in this order.</td>
         </tr>
         {% endfor %}
+
         <!-- Delivery -->
         <tr>
           <td colspan="3" style="text-align:right;"><strong>Delivery:</strong></td>
@@ -62,6 +65,7 @@
             {% endif %}
           </td>
         </tr>
+
         <!-- Total -->
         <tr>
           <td colspan="3" style="text-align:right;"><strong>Total:</strong></td>
