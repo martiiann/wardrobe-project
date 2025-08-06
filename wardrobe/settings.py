@@ -11,31 +11,27 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 from decouple import config
+import dj_database_url
+import cloudinary
 
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
+# Secret key & debug
 SECRET_KEY = config('SECRET_KEY')
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
+# Allowed hosts
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
     'needed-lionfish-plainly.ngrok-free.app',
+    'wardrobe-project-2025-a1e1d4253e40.herokuapp.com',  # Heroku domain
 ]
 
-
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -56,6 +52,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # Whitenoise
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -85,10 +82,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'wardrobe.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
+# Database (SQLite for local, Postgres on Heroku)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -96,61 +90,41 @@ DATABASES = {
     }
 }
 
+DATABASE_URL = config("DATABASE_URL", default=None)
+if DATABASE_URL:
+    DATABASES["default"] = dj_database_url.parse(DATABASE_URL)
 
 # Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
-
 
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
+# Static files
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'wardrobeapp/static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = 'static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-import os
-
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'wardrobeapp/static')
-]
+# Media (Cloudinary)
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Stripe Keys
-from decouple import config
-
 STRIPE_PUBLIC_KEY = config("STRIPE_PUBLIC_KEY")
 STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY")
+STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET")
 
-# Email configuration
+# Email
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -158,23 +132,17 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
-
 ADMIN_EMAIL = config("ADMIN_EMAIL")
 
-# Stripe Webhook Secret
-STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET")
+# Site URL (update to Heroku domain in production)
+SITE_URL = 'https://wardrobe-project-2025-a1e1d4253e40.herokuapp.com'
 
-# Custom site URL for building absolute URLs
-SITE_URL = 'https://ef1u217f7da2.ngrok-free.app'
-
-# Cloudinary settings
+# Cloudinary config
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': config('CLOUDINARY_API_KEY'),
     'API_SECRET': config('CLOUDINARY_API_SECRET'),
 }
-
-import cloudinary
 
 cloudinary.config( 
   cloud_name = config('CLOUDINARY_CLOUD_NAME'),
@@ -182,18 +150,19 @@ cloudinary.config(
   api_secret = config('CLOUDINARY_API_SECRET')
 )
 
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
+# Auth redirects
 LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/profile/'  
-LOGOUT_REDIRECT_URL = '/'  # where to go after logout
+LOGIN_REDIRECT_URL = '/profile/'
+LOGOUT_REDIRECT_URL = '/'
 
+# Cart session
 CART_SESSION_ID = 'cart'
 
+# CSRF trusted origins
 CSRF_TRUSTED_ORIGINS = [
     "https://*.stripe.com",
-    "https://*.ngrok-free.app",  # also allow your dev domain
+    "https://*.ngrok-free.app",
+    "https://wardrobe-project-2025-a1e1d4253e40.herokuapp.com"
 ]
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
