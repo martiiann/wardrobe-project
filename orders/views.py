@@ -255,7 +255,8 @@ def stripe_webhook(request):
             sig_header,
             settings.STRIPE_WEBHOOK_SECRET
         )
-    except Exception:
+    except Exception as e:
+        print(f"Webhook error: {str(e)}")  # Add error logging
         return HttpResponse(status=400)
 
     if event['type'] == 'checkout.session.completed':
@@ -265,7 +266,7 @@ def stripe_webhook(request):
         User = get_user_model()
         user = User.objects.filter(id=metadata.get('user_id')).first() if metadata.get('user_id') else None
 
-        # Create Order
+        # Create order with Pending status
         order = Order.objects.create(
             user=user,
             guest_token=metadata.get('guest_token') if not user else None,
@@ -277,81 +278,82 @@ def stripe_webhook(request):
             country=metadata.get('country', ''),
             payment_method=metadata.get('payment_method', 'card'),
             total_price=session['amount_total'] / 100,
-            status='Paid',
+            status='Pending',  # Explicitly set to Pending
+            paid=False,  # Add this if your model has this field
         )
 
-        # Add items
+        from products.models import Product, Size
         cart_items = json.loads(metadata.get('cart', '[]'))
-        for item in cart_items:
-            try:
-                product = Product.objects.get(id=item['product_id'])
-            except Product.DoesNotExist:
-                continue
 
+        for item in cart_items:
             size = None
             if item.get('size_id'):
                 try:
                     size = Size.objects.get(id=item['size_id'])
                 except Size.DoesNotExist:
-                    pass
+                    size = None
+
+            product = Product.objects.get(id=item['product_id'])
 
             OrderItem.objects.create(
                 order=order,
                 product=product,
                 size=size,
                 quantity=item['quantity'],
-                price=item['price']
+                price=item['price'],
             )
 
-        # Build site URL
-        site_url = settings.SITE_URL.rstrip('/')
+        # Get site URL properly
+        site_url = settings.SITE_URL if hasattr(settings, 'SITE_URL') else request.build_absolute_uri('/')
+        site_url = site_url.rstrip('/')  # Remove trailing slash
 
-        # Build order link
-        if user:
-            order_url = f"{site_url}/orders/{order.id}/"
-        else:
-            order_url = f"{site_url}/orders/guest/{order.id}/{order.guest_token}/"
-
-        # Generate full image URL for each product
+        # Build proper image URLs
+        email_items = []
         for item in order.items.all():
             if item.product.image:
-                item.product.image_url_full = site_url + item.product.image.url
+                # Proper URL construction
+                image_path = item.product.image.url.lstrip('/')
+                image_url_full = f"{site_url}/{image_path}"
+            else:
+                image_url_full = ''
+            
+            email_items.append({
+                'product_name': item.product.name,
+                'image_url_full': image_url_full,
+                'size': item.size.name if item.size else '-',
+                'quantity': item.quantity,
+                'price': item.price,
+            })
 
-        # Render email for user
+        # Order URL
+        order_url = (
+            f"{site_url}/orders/{order.id}/"
+            if order.user
+            else f"{site_url}/orders/guest/{order.id}/{order.guest_token}/"
+        )
+
+        # Render and send email
         html_message = render_to_string(
             'orders/email_confirmation.html',
             {
                 'order': order,
-                'items': order.items.all(),
+                'items': email_items,
                 'order_url': order_url,
                 'site_url': site_url,
             }
         )
 
-        # Email to customer
-        try:
-            email = EmailMultiAlternatives(
-                subject=f"Order Confirmation #{order.id}",
-                body=f"Thank you for your order #{order.id}. View it here: {order_url}",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                to=[order.email],
-            )
-            email.attach_alternative(html_message, "text/html")
-            email.send(fail_silently=False)
-        except Exception as e:
-            print(f"Error sending user email: {e}")
+        email = EmailMultiAlternatives(
+            subject=f"Order Confirmation #{order.id}",
+            body=f"Thank you for your order #{order.id}. View here: {order_url}",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[order.email],
+        )
+        email.attach_alternative(html_message, "text/html")
+        email.send(fail_silently=False)
 
-        # Email to admin
-        try:
-            send_mail(
-                subject=f"New Order #{order.id} Placed",
-                message=f"Order #{order.id} by {order.full_name}. Total: £{order.total_price}. View: {order_url}",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[settings.ADMIN_EMAIL],
-                fail_silently=False
-            )
-        except Exception as e:
-            print(f"Error sending admin email: {e}")
+        # Log successful order creation
+        print(f"Order {order.id} created with status: {order.status}")
 
     return HttpResponse(status=200)
 
