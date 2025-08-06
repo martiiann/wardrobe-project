@@ -31,13 +31,15 @@ def product_list(request):
     })
 
 
-def product_list_by_gender(request, gender):
+def product_list_by_gender(request, gender, category=None):
     gender = gender.lower()
     categories = Category.objects.filter(gender=gender)
     products = Product.objects.filter(gender=gender)
 
-    category_slug = request.GET.get('category')
+    # Handle both path parameter and query parameter for backward compatibility
+    category_slug = category or request.GET.get('category')
     selected_category = None
+    
     if category_slug:
         selected_category = get_object_or_404(Category, slug=category_slug, gender=gender)
         products = products.filter(category=selected_category)
@@ -106,3 +108,4 @@ def product_detail(request, pk):
         'from_order': request.session.get('from_order', None),
         'prev_page': request.session.get('prev_page')
     })
+    
