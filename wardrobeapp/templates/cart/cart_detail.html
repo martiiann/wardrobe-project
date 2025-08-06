@@ -23,7 +23,7 @@
                         {% for item in cart %}
                         <tr data-row-id="{{ item.key }}">
                             <td>
-                                <a href="{% url 'products:product_detail' item.product.id %}?from_cart=true" class="text-white text-decoration-none">
+                                <a href="{{ item.product.get_absolute_url }}?from_cart=true" class="text-white text-decoration-none">
                                     {{ item.product.name|default:"Unknown Product" }}
                                 </a>
                             </td>
