@@ -99,6 +99,16 @@
       </tr>
     </table>
 
+    <h3>Shipping Address</h3>
+    <p>
+      {{ order.full_name }}<br>
+      {{ order.address_line1 }}<br>
+      {% if order.address_line2 %}{{ order.address_line2 }}<br>{% endif %}
+      {{ order.city }}<br>
+      {{ order.postcode }}<br>
+      {{ order.country }}
+    </p>
+
     <div class="footer">
       <p>View your order: <a href="{{ order_url }}">{{ order_url }}</a></p>
       <p>We'll notify you when your order ships.</p>
