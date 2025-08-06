@@ -300,21 +300,18 @@ def stripe_webhook(request):
 
         site_url = settings.SITE_URL if hasattr(settings, 'SITE_URL') else request.build_absolute_uri('/')
 
-        # ✅ User order URL
+        # Correct order URL (different for guest and logged-in user)
         if order.user:
             order_url = f"{site_url}orders/{order.id}/"
         else:
             order_url = f"{site_url}orders/guest/{order.id}/{order.guest_token}/"
 
-        # ✅ Admin order URL (custom dashboard path)
-        admin_order_url = f"{site_url}admin-dashboard/orders/{order.id}/"
-
-        # ✅ Add absolute image URLs for email
+        # Make absolute image URLs for HTML email
         for item in order.items.all():
             if item.product.image:
                 item.product.image_url_full = site_url + item.product.image.url
 
-        # ✅ Send user email
+        # Render HTML email for user
         html_message = render_to_string(
             'orders/email_confirmation.html',
             {
@@ -325,6 +322,7 @@ def stripe_webhook(request):
             }
         )
 
+        # Send email to user
         email = EmailMultiAlternatives(
             subject=f"Order Confirmation #{order.id}",
             body=f"Thank you for your order #{order.id}. View here: {order_url}",
@@ -332,9 +330,10 @@ def stripe_webhook(request):
             to=[order.email],
         )
         email.attach_alternative(html_message, "text/html")
-        email.send()
+        email.send(fail_silently=False)
 
-        # ✅ Send admin email
+        # Send email to admin
+        admin_order_url = order_url
         send_mail(
             subject=f"New Order #{order.id} Placed",
             message=(
