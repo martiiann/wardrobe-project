@@ -89,3 +89,34 @@ def product_detail(request, pk):
         'from_order': request.session.get('from_order', None),
         'prev_page': request.session.get('prev_page')
     })
+
+def product_list_by_gender(request, gender):
+    gender = gender.capitalize()
+    categories = Category.objects.filter(gender=gender.lower())
+    products = Product.objects.filter(gender=gender)
+
+    # Filter by selected category (via query param)
+    category_slug = request.GET.get('category')
+    selected_category = None
+    if category_slug:
+        selected_category = get_object_or_404(Category, slug=category_slug, gender=gender.lower())
+        products = products.filter(category=selected_category)
+
+    # Search
+    search_query = request.GET.get('search', '')
+    if search_query:
+        products = products.filter(name__icontains=search_query)
+
+    # Pagination
+    paginator = Paginator(products, 6)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'products/category_products.html', {
+        'products': page_obj,
+        'page_obj': page_obj,
+        'categories': categories,
+        'selected_category': selected_category,
+        'search_query': search_query,
+        'gender': gender,
+    })

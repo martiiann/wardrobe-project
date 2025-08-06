@@ -17,6 +17,7 @@
     <!-- 🔍 Search & Category -->
     <div class="mb-5">
         <div class="d-flex justify-content-center flex-wrap gap-2 position-relative" style="z-index: 2000; overflow: visible;">
+            
             <!-- 📂 Category Dropdown -->
             <div class="dropdown">
                 <button class="btn btn-outline-light dropdown-toggle" type="button"
@@ -28,16 +29,20 @@
                     {% endif %}
                 </button>
                 <ul class="dropdown-menu dropdown-menu-dark category-grid" aria-labelledby="categoryDropdown">
+                    
+                    <!-- All Categories Option -->
                     <li>
                         <a class="dropdown-item {% if not selected_category %}active{% endif %}"
-                           href="?{% if gender == 'Men' %}gender=men{% else %}gender=women{% endif %}">
+                        href="{% url 'product_list_by_gender' gender=gender|lower %}">
                             All
                         </a>
                     </li>
+
+                    <!-- Individual Categories -->
                     {% for category in categories %}
                     <li>
                         <a class="dropdown-item {% if selected_category and selected_category.slug == category.slug %}active{% endif %}"
-                           href="?category={{ category.slug }}">
+                        href="{% url 'product_list_by_gender' gender=gender|lower %}?category={{ category.slug }}">
                             {{ category.name }}
                         </a>
                     </li>
@@ -51,7 +56,7 @@
                     <input type="hidden" name="category" value="{{ selected_category.slug }}">
                 {% endif %}
                 <input type="text" name="search" class="form-control form-control-sm me-2"
-                       placeholder="Search products..." value="{{ request.GET.search }}">
+                    placeholder="Search products..." value="{{ request.GET.search }}">
                 <button class="btn btn-outline-light btn-sm">Search</button>
             </form>
         </div>
