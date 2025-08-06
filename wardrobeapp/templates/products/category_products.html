@@ -11,7 +11,7 @@
 
     <!-- 🏷 Page Title -->
     <h2 class="text-center mb-4 stylish-heading">
-        {{ gender }}'s Collection{% if selected_category %}: {{ selected_category.name }}{% endif %}
+        {{ gender|capfirst }}'s Collection{% if selected_category %}: {{ selected_category.name }}{% endif %}
     </h2>
 
     <!-- 🔍 Search & Category -->
