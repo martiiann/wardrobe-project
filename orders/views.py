@@ -262,8 +262,7 @@ def stripe_webhook(request):
         metadata = session.get('metadata', {})
 
         User = get_user_model()
-        user = User.objects.filter(id=metadata.get('user_id')).first() \
-            if metadata.get('user_id') else None
+        user = User.objects.filter(id=metadata.get('user_id')).first() if metadata.get('user_id') else None
 
         order = Order.objects.create(
             user=user,
@@ -299,14 +298,23 @@ def stripe_webhook(request):
                 price=item['price'],
             )
 
-        site_url = settings.SITE_URL if hasattr(
-            settings, 'SITE_URL'
-        ) else request.build_absolute_uri('/')
+        site_url = settings.SITE_URL if hasattr(settings, 'SITE_URL') else request.build_absolute_uri('/')
 
-        order_url = f"{site_url}orders/{order.id}/"
-        if order.guest_token:
-            order_url += f"?token={order.guest_token}"
+        # ✅ User order URL
+        if order.user:
+            order_url = f"{site_url}orders/{order.id}/"
+        else:
+            order_url = f"{site_url}orders/guest/{order.id}/{order.guest_token}/"
 
+        # ✅ Admin order URL (custom dashboard path)
+        admin_order_url = f"{site_url}admin-dashboard/orders/{order.id}/"
+
+        # ✅ Add absolute image URLs for email
+        for item in order.items.all():
+            if item.product.image:
+                item.product.image_url_full = site_url + item.product.image.url
+
+        # ✅ Send user email
         html_message = render_to_string(
             'orders/email_confirmation.html',
             {
@@ -319,15 +327,14 @@ def stripe_webhook(request):
 
         email = EmailMultiAlternatives(
             subject=f"Order Confirmation #{order.id}",
-            body=f"Thank you for your order #{order.id}. "
-                 f"View here: {order_url}",
+            body=f"Thank you for your order #{order.id}. View here: {order_url}",
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[order.email],
         )
         email.attach_alternative(html_message, "text/html")
         email.send()
 
-        admin_email = settings.DEFAULT_FROM_EMAIL
+        # ✅ Send admin email
         send_mail(
             subject=f"New Order #{order.id} Placed",
             message=(
@@ -335,7 +342,7 @@ def stripe_webhook(request):
                 f"Order ID: {order.id}\n"
                 f"Customer: {order.full_name}\n"
                 f"Total: £{order.total_price}\n"
-                f"View: {order_url}"
+                f"View: {admin_order_url}"
             ),
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[settings.ADMIN_EMAIL],
@@ -360,61 +367,16 @@ def success(request):
             order = Order.objects.filter(id=order_id).first()
 
         if order:
-            # Send confirmation email (backup in case webhook fails)
-            site_url = settings.SITE_URL if hasattr(
-                settings, 'SITE_URL'
-            ) else request.build_absolute_uri('/')
-
-            order_url = f"{site_url}orders/{order.id}/"
-            if order.guest_token:
-                order_url += f"?token={order.guest_token}"
-
-            html_message = render_to_string(
-                'orders/email_confirmation.html',
-                {
-                    'order': order,
-                    'items': order.items.all(),
-                    'order_url': order_url,
-                    'site_url': site_url,
-                }
-            )
-
-            email = EmailMultiAlternatives(
-                subject=f"Order Confirmation #{order.id}",
-                body=f"Thank you for your order #{order.id}. View here: {order_url}",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                to=[order.email],
-            )
-            email.attach_alternative(html_message, "text/html")
-            email.send()
-
-            # Notify admin
-            send_mail(
-                subject=f"New Order #{order.id} Placed",
-                message=(
-                    f"A new order has been placed.\n\n"
-                    f"Order ID: {order.id}\n"
-                    f"Customer: {order.full_name}\n"
-                    f"Total: £{order.total_price}\n"
-                    f"View: {order_url}"
-                ),
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[settings.ADMIN_EMAIL],
-                fail_silently=False,
-            )
-
-            # Redirect user to order detail
             if order.user:
-                order_detail_url = reverse('orders:order_detail', args=[order.id])
+                order_url = reverse('orders:order_detail', args=[order.id])
             else:
-                order_detail_url = order.get_guest_order_url()
+                order_url = order.get_guest_order_url()
 
-            separator = '&' if '?' in order_detail_url else '?'
-            return redirect(f"{order_detail_url}{separator}just_ordered=true")
+            separator = '&' if '?' in order_url else '?'
+            return redirect(f"{order_url}{separator}just_ordered=true")
 
     messages.warning(
         request,
-        "We couldn’t find your order, but your payment may have gone through. "
-        "Please check your email."
+        "We couldn’t find your order, but your payment may have gone through. Please check your email."
     )
     return redirect('shop')
