@@ -220,9 +220,22 @@ def create_checkout_session(request):
             'quantity': 1,
         })
 
+    # ✅ Include all required details for webhook email
     metadata = {
         'order_id': str(order.id),
         'guest_token': order.guest_token or '',
+        'email': order.email,
+        'full_name': order.full_name,
+        'user_id': str(order.user.id) if order.user else '',
+        'cart': json.dumps([
+            {
+                'product_id': item['product'].id,
+                'size_id': getattr(item.get('size_obj'), 'id', None),
+                'quantity': item['quantity'],
+                'price': item['price']
+            }
+            for item in cart
+        ])
     }
 
     success_url = request.build_absolute_uri(
