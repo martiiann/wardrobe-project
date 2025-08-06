@@ -20,6 +20,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from wardrobeapp import views
 from orders import views as order_views
+from orders.views import stripe_webhook
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
@@ -33,6 +34,7 @@ urlpatterns = [
     path('orders/', include('orders.urls')),
     path('faq/', include(('faq.urls', 'faq'), namespace='faq')),
     path('adminpanel/', include('adminpanel.urls')),
+    path("stripe/webhook/", stripe_webhook, name="stripe-webhook"),
 ]
 
 if settings.DEBUG:
