@@ -360,13 +360,57 @@ def success(request):
             order = Order.objects.filter(id=order_id).first()
 
         if order:
-            if order.user:
-                order_url = reverse('orders:order_detail', args=[order.id])
-            else:
-                order_url = order.get_guest_order_url()
+            # Send confirmation email (backup in case webhook fails)
+            site_url = settings.SITE_URL if hasattr(
+                settings, 'SITE_URL'
+            ) else request.build_absolute_uri('/')
 
-            separator = '&' if '?' in order_url else '?'
-            return redirect(f"{order_url}{separator}just_ordered=true")
+            order_url = f"{site_url}orders/{order.id}/"
+            if order.guest_token:
+                order_url += f"?token={order.guest_token}"
+
+            html_message = render_to_string(
+                'orders/email_confirmation.html',
+                {
+                    'order': order,
+                    'items': order.items.all(),
+                    'order_url': order_url,
+                    'site_url': site_url,
+                }
+            )
+
+            email = EmailMultiAlternatives(
+                subject=f"Order Confirmation #{order.id}",
+                body=f"Thank you for your order #{order.id}. View here: {order_url}",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[order.email],
+            )
+            email.attach_alternative(html_message, "text/html")
+            email.send()
+
+            # Notify admin
+            send_mail(
+                subject=f"New Order #{order.id} Placed",
+                message=(
+                    f"A new order has been placed.\n\n"
+                    f"Order ID: {order.id}\n"
+                    f"Customer: {order.full_name}\n"
+                    f"Total: £{order.total_price}\n"
+                    f"View: {order_url}"
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[settings.ADMIN_EMAIL],
+                fail_silently=False,
+            )
+
+            # Redirect user to order detail
+            if order.user:
+                order_detail_url = reverse('orders:order_detail', args=[order.id])
+            else:
+                order_detail_url = order.get_guest_order_url()
+
+            separator = '&' if '?' in order_detail_url else '?'
+            return redirect(f"{order_detail_url}{separator}just_ordered=true")
 
     messages.warning(
         request,
