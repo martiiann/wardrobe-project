@@ -116,7 +116,7 @@ def product_list_by_gender(request, gender):
         'products': page_obj,
         'page_obj': page_obj,
         'categories': categories,
-        'selected_category': selected_category,
+        'category': selected_category,  # ✅ fix this key
         'search_query': search_query,
         'gender': gender,
     })
