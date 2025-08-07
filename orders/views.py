@@ -25,6 +25,7 @@ from cart.cart import Cart
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
+
 # Confirmed working during TDD process
 def order_history(request):
     if not request.user.is_authenticated:
@@ -50,7 +51,7 @@ def order_detail(request, order_id):
     elif not order.user:
         token = request.GET.get('token')
         if not token or str(token) != str(order.guest_token):
-            return HttpResponseForbidden(
+            raise PermissionDenied(
                 "You do not have permission to view this order."
             )
 
@@ -62,11 +63,15 @@ def guest_order_detail(request, order_id, token):
 
     # Check access permission
     if order.user is not None:
-        raise PermissionDenied("This order is not a guest order.")
+        raise PermissionDenied(
+            "This order is not a guest order."
+        )
 
     if str(order.guest_token) != str(token):
         if not request.user.is_staff:
-            raise PermissionDenied("You do not have permission to view this order.")
+            raise PermissionDenied(
+                "You do not have permission to view this order."
+            )
 
     # Optional: Show success message if just placed
     if request.GET.get('just_ordered') == 'true':
@@ -113,8 +118,10 @@ def checkout(request):
                 print(
                     "DEBUG Checkout item:",
                     item['product'],
-                    "size_id:", size_id,
-                    "size_name:", getattr(item.get('size_obj'), 'name', None)
+                    "size_id:",
+                    size_id,
+                    "size_name:",
+                    getattr(item.get('size_obj'), 'name', None),
                 )
 
                 if size_id:
@@ -164,8 +171,11 @@ def create_checkout_session(request):
     form = CheckoutForm(data)
     if not form.is_valid():
         return JsonResponse(
-            {'error': 'Invalid form data', 'details': form.errors},
-            status=400
+            {
+                'error': 'Invalid form data',
+                'details': form.errors,
+            },
+            status=400,
         )
 
     order = form.save(commit=False)
@@ -225,15 +235,11 @@ def create_checkout_session(request):
             'quantity': 1,
         })
 
-    metadata = {
-        'order_id': str(order.id),
-        'guest_token': order.guest_token or '',
-        'user_id': str(order.user.id) if order.user else '',
-    }
-
-    success_url = request.build_absolute_uri(
-        '/orders/success/'
-    ) + "?session_id={CHECKOUT_SESSION_ID}"
+    success_url = (
+        request.build_absolute_uri('/orders/success/')
+        + "?session_id="
+        + "{CHECKOUT_SESSION_ID}"
+    )
 
     cancel_url = request.build_absolute_uri(reverse('orders:cancelled'))
 
@@ -243,7 +249,6 @@ def create_checkout_session(request):
         mode='payment',
         success_url=success_url,
         cancel_url=cancel_url,
-        metadata=metadata,
     )
 
     return JsonResponse({'id': session.id})
@@ -277,13 +282,21 @@ def stripe_webhook(request):
         order.save()
 
         # ✅ Build full site URL (used in email)
-        site_url = settings.SITE_URL.rstrip('/') if hasattr(settings, 'SITE_URL') else request.build_absolute_uri('/').rstrip('/')
+        site_url = (
+            settings.SITE_URL.rstrip('/')
+            if hasattr(settings, 'SITE_URL')
+            else request.build_absolute_uri('/').rstrip('/')
+        )
 
         # ✅ Generate order URL (guest or user)
         if order.user:
             order_url = f"{site_url}/orders/{order.id}/"
         else:
-            order_url = f"{site_url}/orders/guest/{order.id}/{order.guest_token}/"
+            order_url = (
+                f"{site_url}/orders/guest/"
+                f"{order.id}/"
+                f"{order.guest_token}/"
+            )
 
         # ✅ Render HTML email — no images
         html_message = render_to_string(
@@ -299,7 +312,10 @@ def stripe_webhook(request):
         # ✅ Send email to customer
         email = EmailMultiAlternatives(
             subject=f"Order Confirmation #{order.id}",
-            body=f"Thank you for your order #{order.id}. You can view it here: {order_url}",
+            body=(
+                f"Thank you for your order #{order.id}. "
+                f"You can view it here: {order_url}"
+            ),
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[order.email],
         )
@@ -310,11 +326,12 @@ def stripe_webhook(request):
         send_mail(
             subject=f"New Order #{order.id} Placed",
             message=(
-                f"A new order has been placed.\n\n"
+                "A new order has been placed.\n\n"
                 f"Order ID: {order.id}\n"
                 f"Customer: {order.full_name}\n"
                 f"Total: £{order.total_price}\n"
-                f"View: {order_url}"
+                "View: "
+                f"{order_url}"
             ),
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[settings.ADMIN_EMAIL],
@@ -349,6 +366,9 @@ def success(request):
 
     messages.warning(
         request,
-        "We couldn’t find your order, but your payment may have gone through. Please check your email."
+        (
+            "We couldn’t find your order, but your payment may have gone "
+            "through. Please check your email."
+        )
     )
     return redirect('shop')

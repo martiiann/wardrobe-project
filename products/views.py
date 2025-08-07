@@ -27,7 +27,7 @@ def product_list(request):
     return render(request, 'products/shop.html', {
         'products': page_obj,
         'page_obj': page_obj,
-        'search_query': search_query
+        'search_query': search_query,
     })
 
 
@@ -39,9 +39,13 @@ def product_list_by_gender(request, gender, category=None):
     # Handle both path parameter and query parameter for backward compatibility
     category_slug = category or request.GET.get('category')
     selected_category = None
-    
+
     if category_slug:
-        selected_category = get_object_or_404(Category, slug=category_slug, gender=gender)
+        selected_category = get_object_or_404(
+            Category,
+            slug=category_slug,
+            gender=gender
+        )
         products = products.filter(category=selected_category)
 
     search_query = request.GET.get('search', '')
@@ -57,7 +61,11 @@ def product_list_by_gender(request, gender, category=None):
         'page_obj': page_obj,
         'categories': categories,
         'selected_category': selected_category,
-        'category': selected_category if selected_category else {'name': 'All'},
+        'category': (
+            selected_category
+            if selected_category
+            else {'name': 'All'}
+        ),
         'search_query': search_query,
         'gender': gender,
     })
@@ -106,6 +114,5 @@ def product_detail(request, pk):
         'product': product,
         'from_cart': request.session.get('from_cart', False),
         'from_order': request.session.get('from_order', None),
-        'prev_page': request.session.get('prev_page')
+        'prev_page': request.session.get('prev_page'),
     })
-    
