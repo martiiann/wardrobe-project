@@ -131,13 +131,13 @@ SITE_URL = f"https://{config('ALLOWED_HOSTS', default='wardrobe-project-2025-a1e
 
 # 📧 Email (Brevo SMTP)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp-relay.brevo.com')
-EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '941897001@smtp-brevo.com')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'martiyan03817@gmail.com')
-ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'martiyan03817@gmail.com')
+EMAIL_HOST = config('EMAIL_HOST', default='smtp-relay.brevo.com')
+EMAIL_PORT = config('EMAIL_PORT', cast=int, default=587)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool, default=True)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='941897001@smtp-brevo.com')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='martiyan03817@gmail.com')
+ADMIN_EMAIL = config('ADMIN_EMAIL', default='martiyan03817@gmail.com')
 
 # 🔑 Auth
 LOGIN_URL = '/login/'
