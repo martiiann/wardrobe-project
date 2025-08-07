@@ -14,7 +14,7 @@ It enables secure online shopping, real-time cart updates, and streamlined order
 1. [Responsive Overview](#responsive-overview)
 2. [Page Overviews](#page-overviews)
 3. [Wireframes](#wireframes)
-4. [Database Design](#database-design-erd)
+4. [Database Design (ERD)](#database-design-erd)
 5. [User Flow Diagram](#user-flow-diagram)
 6. [Features](#features)
 7. [Technical Stack](#technical-stack)
