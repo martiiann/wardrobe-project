@@ -49,9 +49,6 @@ class Product(models.Model):
     def get_current_price(self):
         return self.price
 
-    def get_absolute_url(self):
-        return reverse('product_detail', kwargs={'pk': self.pk})
-
 
 class ProductImage(models.Model):
     product = models.ForeignKey(
