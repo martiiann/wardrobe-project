@@ -1,236 +1,206 @@
-    # Wardrobe 🛍️
+# Wardrobe 🛍️
 
-    ![Wardrobe Preview](README_IMAGES/wardrobe-overview.png)
+![Wardrobe Preview](README_IMAGES/laptophome.png)
 
-    Wardrobe is a full-stack e-commerce application built with Django, Bootstrap, and Stripe.  
-    It allows users to browse men's and women's clothing, filter by category and size, add products to a shopping cart, checkout securely, and track their orders with a custom admin dashboard.
+**Wardrobe** is a fully responsive, full-stack e-commerce platform built with Django, Bootstrap, and Stripe.  
+It enables secure online shopping, real-time cart updates, and streamlined order tracking via a custom admin dashboard.
 
-    🔗 [Live Site (Coming Soon)](https://your-heroku-app.herokuapp.com)  
-    💻 [GitHub Repository](https://github.com/yourusername/wardrobe-project)
+🔗 **Live Site:** https://wardrobe-project-2025-a1e1d4253e40.herokuapp.com/  
+💻 **GitHub:** https://github.com/martiiann/wardrobe-project
 
-    ---
+---
 
-    ## 📚 Table of Contents
-    - [Responsive Overview](#-responsive-overview)
-    - [Page Overviews](#-page-overviews)
-    - [Wireframes](#-wireframes)
-    - [Database Design (ERD)](#️-database-design-erd)
-    - [Features](#-features)
-    - [Functionality Overview](#-functionality-overview)
-    - [Manual Testing Table](#-manual-testing-table)
-    - [First-Time Visitor Goals](#-first-time-visitor-goals)
-    - [Returning Visitor Goals](#-returning-visitor-goals)
-    - [Design](#-design)
-    - [Validator Testing](#-validator-testing)
-    - [Performance](#-performance)
-    - [Devices Tested](#-devices-tested)
-    - [Browser Compatibility](#-browser-compatibility)
-    - [Future Features](#-future-features)
-    - [Deployment](#-deployment)
-    - [Debugging & Problem Solving](#-debugging--problem-solving)
-    - [Lessons Learned](#-lessons-learned)
-    - [Acknowledgments](#-acknowledgments)
+## 📱 Responsive Overview
 
-    ---
+| Mobile View | Tablet View | Desktop View |
+|-------------|-------------|--------------|
+| ![Mobile Home](README_IMAGES/mobilehome.png) | ![Tablet Shop](README_IMAGES/tabletshop.png) | ![Laptop Shop](README_IMAGES/laptopshop.png) |
+| ![Mobile Checkout](README_IMAGES/mobilecheckout.png) | ![Tablet Cart](README_IMAGES/tabletcart.png) | ![Laptop Home](README_IMAGES/laptophome.png) |
 
-    ## 📱 Responsive Overview
-    Mobile, tablet, and desktop views tested manually.
+---
 
-    | Mobile View | Tablet View | Desktop View |
-    |-------------|-------------|--------------|
-    | ![Mobile](README_IMAGES/mobile.png) | ![Tablet](README_IMAGES/tablet.png) | ![Desktop](README_IMAGES/desktop.png) |
+## 🧭 Page Overviews
+### 🏠 Home Page
+![Home](README_IMAGES/laptophome.png)
 
-    ---
+### 🛍️ Shop Page
+![Shop](README_IMAGES/laptopshop.png)
 
-    ## 🧭 Page Overviews
-    ### 🏠 Home Page
-    ![Home](README_IMAGES/homepage.png)
+### 🛒 Cart Page
+![Cart](README_IMAGES/cartwf.PNG)
 
-    ### 🛍️ Shop Page
-    ![Shop](README_IMAGES/shopoverview.png)
+### 💳 Checkout Page
+![Checkout](README_IMAGES/checkoutwf.PNG)
 
-    ### 🛒 Cart Page
-    ![Cart](README_IMAGES/cartoverview.png)
+### 📦 Order History
+![Order History](README_IMAGES/ordersviewstest.png)
 
-    ### 💳 Checkout Page
-    ![Checkout](README_IMAGES/checkoutoverview.png)
+### 👤 Profile Page
+![Profile](README_IMAGES/profilehtmltest.png)
 
-    ### 📦 Order History
-    ![Orders](README_IMAGES/orderhistory.png)
+### ⚙️ Admin Dashboard
+![Admin View](README_IMAGES/adminviewstest.png)
 
-    ### 👤 Profile Page
-    ![Profile](README_IMAGES/profile.png)
+---
 
-    ### ⚙️ Admin Dashboard
-    ![Admin](README_IMAGES/adminpanel.png)
+## 🧩 Wireframes
+| Page              | Wireframe |
+|-------------------|-----------|
+| Home              | ![Home WF](README_IMAGES/homewf.PNG) |
+| Shop (Product Detail) | ![Product Detail WF](README_IMAGES/productdetailwf.PNG) |
+| Cart              | ![Cart WF](README_IMAGES/cartwf.PNG) |
+| Checkout          | ![Checkout WF](README_IMAGES/checkoutwf.PNG) |
 
-    ---
+---
 
-    ## 🧩 Wireframes
-    Initial wireframes created during planning (desktop, tablet, mobile).  
-    Some adjustments made during development to improve UX.
+## 🗃️ Database Design (ERD)
+![ERD](README_IMAGES/erddiagram.png)
 
-    | Page         | Wireframe |
-    |--------------|-----------|
-    | Home         | ![Home WF](README_IMAGES/wf_home.png) |
-    | Shop         | ![Shop WF](README_IMAGES/wf_shop.png) |
-    | Cart         | ![Cart WF](README_IMAGES/wf_cart.png) |
-    | Checkout     | ![Checkout WF](README_IMAGES/wf_checkout.png) |
-    | Profile      | ![Profile WF](README_IMAGES/wf_profile.png) |
-    | Admin Panel  | ![Admin WF](README_IMAGES/wf_admin.png) |
+---
 
-    ---
+## 🔄 User Flow Diagram
+![User Flow](README_IMAGES/userflowdiagram.png)
 
-    ## 🗃️ Database Design (ERD)
-    Entity Relationship Diagram showing all models and relationships:
-    - User ↔ Profile (1:1)
-    - Category ↔ Product (1:M)
-    - Product ↔ Sizes (M:M)
-    - Product ↔ ProductImages (1:M)
-    - Order ↔ OrderItems (1:M)
-    - User ↔ Order (1:M)
+---
 
-    ![ERD](README_IMAGES/erd.png)
+## ✨ Features
+- 🔐 **Authenticate** — Secure registration, login, and logout
+- 🛍️ **Browse** — Shop by gender and category with responsive product cards
+- 📄 **Product Details** — View product descriptions, prices, availability, and select sizes
+- 🛒 **Live Cart Updates** — Add, update, and remove items with instant cart count updates
+- 💳 **Checkout Securely** — Stripe integration for safe, fast transactions
+- 📦 **Track Orders** — Order history and tracking number display
+- 🖥 **Custom Admin Panel** — Manage products, orders, and tracking in a tailored dashboard
+- 📱 **Responsive by Design** — Optimized for mobile, tablet, and desktop
 
-    ---
+---
 
-    ## ✨ Features
-    - **User Authentication**: Register, login, logout  
-    - **Shop by Category & Gender**: Men’s and women’s sections with filters  
-    - **Product Details**: Multiple images, size selection, availability status  
-    - **Cart**: Add, update, remove items (with live updates)  
-    - **Checkout**: Stripe integration for secure payments  
-    - **Order Tracking**: Order history with tracking numbers  
-    - **Custom Admin Dashboard**: Manage products, orders, and tracking numbers  
-    - **Responsive Design**: Mobile-first with Bootstrap  
+## 🛠 Technical Stack
+**Frontend:** HTML5, CSS3, JavaScript (ES6), Bootstrap  
+**Backend:** Python 3, Django 5  
+**Database:** PostgreSQL  
+**Payments:** Stripe API  
+**Hosting & Storage:** Heroku, Cloudinary  
+**Version Control:** Git, GitHub
 
-    ---
+---
 
-    ## 🧮 Functionality Overview
-    | Feature                        | Description                                                                |
-    |--------------------------------|----------------------------------------------------------------------------|
-    | Add to Cart                    | Add from product page or shop view                                         |
-    | Update Quantity                | Adjust quantity in cart using + / -                                        |
-    | Remove from Cart               | Remove individual items                                                    |
-    | Checkout with Stripe           | Secure payment via Stripe API                                              |
-    | Order History                  | View all past orders with details                                          |
-    | Tracking Number                | Admin can add tracking; user sees it                                       |
-    | Live Cart Updates              | Cart count updates instantly                                               |
-    | Admin Panel                    | Full product & order management                                            |
+## 🧮 Functionality Overview
+| Feature              | Description                                              |
+|----------------------|----------------------------------------------------------|
+| Add to Cart          | Add from product page or shop view                       |
+| Update Quantity      | Adjust quantity in cart using + / −                      |
+| Remove from Cart     | Remove individual items                                  |
+| Checkout with Stripe | Secure payment via Stripe API                            |
+| Order History        | View all past orders with details                        |
+| Tracking Number      | Admin adds tracking; user sees it instantly              |
+| Live Cart Updates    | Cart count updates instantly                             |
+| Admin Panel          | Full product & order management                          |
 
-    ---
+---
 
-    ## ✅ Manual Testing Table
-    | Feature                       | Test Description                          | Expected Outcome                  | Status |
-    |-------------------------------|-------------------------------------------|-----------------------------------|--------|
-    | Register User                 | Create account                           | Success message, redirect               | ✅ Pass |
-    | Login                         | Enter valid credentials                  | Logged in, redirect to shop                | ✅ Pass |
-    | Add to Cart                   | Add product                              | Item in cart, toast alert                     | ✅ Pass |
-    | Remove from Cart              | Remove product                           | Item removed, alert shown                     | ✅ Pass |
-    | Checkout                      | Pay with Stripe test card                | Payment success, order created          | ✅ Pass |
-    | Order History                 | Check history                            | Orders appear correctly                       | ✅ Pass |
-    | Tracking Number               | Admin updates tracking                   | User sees tracking in order detail.       | ✅ Pass |
-    | Responsive Layout             | Test on iPhone / iPad / Desktop          | Layout works well on all sizes               | ✅ Pass |
+## ✅ Manual Testing
 
-    ---
+<details>
+<summary>📋 Click to view Manual Testing Table</summary>
 
-    ## 🎯 First-Time Visitor Goals
-    - Browse categories and products  
-    - View detailed product pages with sizes and prices  
-    - Easily add products to cart and checkout  
+| Feature                    | Test Description                         | Expected Outcome                              | Status |
+|---------------------------|-------------------------------------------|-----------------------------------------------|--------|
+| Register User             | Create account                            | Success message, redirect                     | ✅ Pass |
+| Invalid Registration      | Submit empty/invalid form                 | Errors displayed, no account created          | ✅ Pass |
+| Login                     | Enter valid credentials                   | Logged in, redirect to shop                   | ✅ Pass |
+| Invalid Login             | Enter wrong password                      | Error message, no login                       | ✅ Pass |
+| Add to Cart               | Add from shop and product detail          | Item appears in cart, toast shown             | ✅ Pass |
+| Update Quantity           | Use + / - on cart page                    | Quantity updates, totals recalculated         | ✅ Pass |
+| Remove from Cart          | Remove an item                            | Item removed, totals recalculated             | ✅ Pass |
+| Empty Cart Checkout       | Attempt checkout with no items            | Prevented with warning                        | ✅ Pass |
+| Stripe Success            | Pay with valid test card                  | Payment success, order created, email sent    | ✅ Pass |
+| Stripe Failure            | Use failing test card                     | Payment fails, no order created               | ✅ Pass |
+| Out-of-Stock Product      | Add unavailable size                      | Disabled button / alert shown                 | ✅ Pass |
+| Order History             | View order list                           | Orders render with correct fields             | ✅ Pass |
+| Tracking Number Visibility| Admin adds tracking                       | Tracking shown on user order detail           | ✅ Pass |
+| Auth-Protected Views      | Visit profile/history while logged out    | Redirect to login                             | ✅ Pass |
+| Responsive Layout         | iPhone / iPad / Desktop                   | Layout adapts without overflow                | ✅ Pass |
 
-    ---
+</details>
 
-    ## 🔁 Returning Visitor Goals
-    - Log in to view orders  
-    - Manage saved shipping details  
-    - Track order status  
+---
 
-    ---
+## 🧪 Validator & Automated Testing
 
-    ## 🎨 Design
-    - **Font**: Bootstrap default (modern, clean)  
-    - **Color Theme**: Dark theme with white text for e-commerce look  
-    - **Buttons & Cards**: Consistent Bootstrap styling  
-    - **Responsiveness**: Verified across devices  
+<details>
+<summary>💻 Click to view Validation & Automated Testing Screenshots</summary>
 
-    ---
+### HTML Validation
+![HTML Validation](README_IMAGES/homebasehtmltest.png)  
+![Profile HTML Test](README_IMAGES/profilehtmltest.png)  
+![Shop HTML Test](README_IMAGES/shophtmltest.png)  
+![Checkout HTML Test](README_IMAGES/checkouthtmltest.png)
 
-    ## 🧪 Validator Testing
-    ### ✅ HTML Validation
-    ![HTML Test](README_IMAGES/htmltest.png)  
+### CSS Validation
+![CSS Validation](README_IMAGES/csstest.png)
 
-    ### ✅ CSS Validation
-    ![CSS Test](README_IMAGES/csstest.png)  
+### JavaScript Validation
+![JSHint Validation](README_IMAGES/jshintvalidtest.png)
 
-    ### ✅ JavaScript Validation
-    ![JS Test](README_IMAGES/jstest.png)  
+### Python Validation  
+All Python code validated with the Code Institute Python Linter — no errors.
 
-    ### ✅ Python Validation
-    ![Python Test](README_IMAGES/pythontest.png)  
+**Admin Tests**  
+![Admin Forms Test](README_IMAGES/adminformstest.png)  
+![Admin URL Test](README_IMAGES/adminurlstest.png)  
+![Admin Views Test](README_IMAGES/adminviewstest.png)  
 
-    ---
+**Cart Tests**  
+![Cart HTML Test](README_IMAGES/carthtmltest.png)  
+![Cart Pytest Test](README_IMAGES/cartpytesttest.png)  
+![Cart Views Test](README_IMAGES/cartviewstest.png)  
 
-    ## 🚀 Performance
-    Tested with Lighthouse:  
-    ![Performance](README_IMAGES/lighthouse.png)  
+**Orders Tests**  
+![Orders Forms Test](README_IMAGES/ordersformstest.png)  
+![Orders Model Test](README_IMAGES/ordersmodeltest.png)  
+![Orders URL Test](README_IMAGES/ordersurlstest.png)  
+![Orders Views Test](README_IMAGES/ordersviewstest.png)  
 
-    - **Performance**: 95%  
-    - **Accessibility**: 90%  
-    - **Best Practices**: 94%  
-    - **SEO**: 92%  
+**Products Tests**  
+![Products Admin Test](README_IMAGES/productsadmintest.png)  
+![Products Model Test](README_IMAGES/productsmodeltest.png)  
+![Products View Test](README_IMAGES/productsviewtest.png)  
 
-    ---
+**Wardrobe App Tests**  
+![Wardrobe URL Test](README_IMAGES/wardrobeurlstest.png)  
+![Wardrobe App Forms Test](README_IMAGES/wardrobeappformstest.png)  
+![Wardrobe App Models Test](README_IMAGES/wardrobeappmodelstest.png)  
+![Wardrobe App URL Test](README_IMAGES/wardrobeappurlstest.png)  
+![Wardrobe App Views Test](README_IMAGES/wardrobeappviewstest.png)  
 
-    ## 📱 Devices Tested
-    - Mobile: iPhone 15, Samsung S23 Ultra  
-    - Tablet: iPad Air  
-    - Desktop: MacBook Pro, Windows 1080p  
-    ✅ Works as expected on all  
+</details>
 
-    ---
+---
 
-    ## 🌐 Browser Compatibility
-    - Chrome  
-    - Firefox  
-    - Safari  
-    - Edge  
-    ✅ All major browsers work perfectly  
+## 🚀 Performance
+![Lighthouse Test](README_IMAGES/lighthousetest.png)
 
-    ---
+- **Performance:** 95%  
+- **Accessibility:** 90%  
+- **Best Practices:** 94%  
+- **SEO:** 92%  
 
-    ## 💡 Future Features
-    - Wishlist  
-    - Product reviews & ratings  
-    - Discount codes  
-    - Advanced search  
+---
 
-    ---
+## 💡 Future Features
+- Wishlist  
+- Product reviews & ratings  
+- Discount codes  
+- Advanced search  
 
-    ## 🛠️ Deployment
-    Will be deployed on **Heroku** with:
-    - PostgreSQL for database  
-    - Cloudinary for media storage  
-    - Stripe for payments  
+---
 
-    ---
+## 🛠️ Deployment
+The project was deployed on **Heroku** with:
+- PostgreSQL for database  
+- Cloudinary for media storage  
+- Stripe for payments  
+- GitHub for version control
 
-    ## 🐞 Debugging & Problem Solving
-    - **Cart count not updating** → Fixed via AJAX refresh  
-    - **Image thumbnails not switching** → Added JavaScript event listeners  
-    - **Stripe test mode errors** → Corrected API keys & webhook secret  
-
-    ---
-
-    ## 🧠 Lessons Learned
-    - Django model relationships  
-    - Stripe integration  
-    - Custom admin panels  
-    - Improving UX in e-commerce  
-
-    ---
-
-    ## 🙏 Acknowledgments
-    - Code Institute  
-    - Bootstrap & Django docs  
-    - Stripe API docs
+---
