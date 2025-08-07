@@ -1,9 +1,11 @@
 from django.urls import path
 from . import views
 
+app_name = 'products'  # ✅ Required for namespacing
+
 urlpatterns = [
-    path('product/<int:pk>/', views.product_detail, name='product_detail'),  # ⬅️ Move this to the top
     path('', views.product_list, name='product_list'),
-    path('<str:gender>/<str:category>/', views.product_list_by_gender, name='product_list_by_category'),
+    path('product/<int:pk>/', views.product_detail, name='product_detail'),
     path('<str:gender>/', views.product_list_by_gender, name='product_list_by_gender'),
+    path('<str:gender>/<str:category>/', views.product_list_by_gender, name='product_list_by_category'),
 ]
