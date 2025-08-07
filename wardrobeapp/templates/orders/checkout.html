@@ -13,7 +13,7 @@
     {% for item in cart %}
       <li class="list-group-item d-flex justify-content-between align-items-center bg-dark text-white">
         {{ item.product.name }} (x{{ item.quantity }})
-        <span>£{{ item.total_price|floatformat:2 }}</span>
+        <span>€{{ item.total_price|floatformat:2 }}</span>
       </li>
     {% endfor %}
     
@@ -24,7 +24,7 @@
         {% if cart.get_delivery_fee == 0 %}
           Free (Orders over £50)
         {% else %}
-          £{{ cart.get_delivery_fee|floatformat:2 }}
+          €{{ cart.get_delivery_fee|floatformat:2 }}
         {% endif %}
       </span>
     </li>
@@ -32,7 +32,7 @@
     <!-- Total -->
     <li class="list-group-item d-flex justify-content-between bg-secondary text-white fw-bold">
       Total:
-      <span>£{{ cart.get_total_with_delivery|floatformat:2 }}</span>
+      <span>€{{ cart.get_total_with_delivery|floatformat:2 }}</span>
     </li>
   </ul>
 </div>

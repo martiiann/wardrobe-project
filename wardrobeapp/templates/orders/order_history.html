@@ -40,7 +40,7 @@
             </span>
 
             &nbsp;|&nbsp;
-            <strong>Total:</strong> £{{ order.total_price }}
+            <strong>Total:</strong> €{{ order.total_price }}
 
             <div class="mt-2">
               {% for item in order.items.all|slice:":3" %}
