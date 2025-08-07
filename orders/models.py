@@ -67,11 +67,8 @@ class Order(models.Model):
     )
 
     def __str__(self):
-        size_display = (
-            f" (Size: {self.size.name or 'Not specified'})"
-            if self.size else ""
-        )
-        return f"{self.quantity} x {self.product.name}{size_display}"
+        return f"Order #{self.id} - {self.full_name}"
+
 
     def get_guest_order_url(self):
         from django.urls import reverse
