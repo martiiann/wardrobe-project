@@ -173,7 +173,7 @@ def create_checkout_session(request):
         order.user = request.user
     else:
         order.user = None
-        order.guest_token = secrets.token_urlsafe(16)
+        order.guest_token = uuid.uuid4()
 
     order.email = form.cleaned_data['email']
     order.full_name = form.cleaned_data['full_name']
