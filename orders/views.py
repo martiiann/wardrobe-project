@@ -249,6 +249,9 @@ def create_checkout_session(request):
         mode='payment',
         success_url=success_url,
         cancel_url=cancel_url,
+        metadata={
+            'order_id': str(order.id)
+        }
     )
 
     return JsonResponse({'id': session.id})
