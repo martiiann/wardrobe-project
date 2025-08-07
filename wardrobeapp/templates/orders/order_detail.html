@@ -135,7 +135,7 @@
     <ul class="list-group list-group-flush">
       {% for item in order.items.all %}
         <li class="list-group-item bg-dark text-white p-0 mb-2 rounded">
-          <a href="{% url 'products:product_detail' item.product.id %}" class="text-decoration-none text-white d-flex align-items-center gap-3 p-3">
+          <a href="{% url 'product_detail' item.product.id %}" class="text-decoration-none text-white d-flex align-items-center gap-3 p-3">
             <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
                  class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
             <div>

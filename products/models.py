@@ -50,7 +50,7 @@ class Product(models.Model):
         return self.price
 
     def get_absolute_url(self):
-        return reverse('products:product_detail', kwargs={'pk': self.pk})
+        return reverse('product_detail', kwargs={'pk': self.pk})
 
 
 class ProductImage(models.Model):
