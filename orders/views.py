@@ -16,6 +16,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import PermissionDenied
 
 from .forms import CheckoutForm
 from .models import Order, OrderItem
@@ -57,13 +58,17 @@ def order_detail(request, order_id):
 
 
 def guest_order_detail(request, order_id, token):
-    order = get_object_or_404(
-        Order,
-        id=order_id,
-        guest_token=token,
-        user__isnull=True
-    )
+    order = get_object_or_404(Order, id=order_id)
 
+    # Check access permission
+    if order.user is not None:
+        raise PermissionDenied("This order is not a guest order.")
+
+    if str(order.guest_token) != str(token):
+        if not request.user.is_staff:
+            raise PermissionDenied("You do not have permission to view this order.")
+
+    # Optional: Show success message if just placed
     if request.GET.get('just_ordered') == 'true':
         messages.success(
             request,

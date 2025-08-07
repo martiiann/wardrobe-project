@@ -47,4 +47,5 @@ urlpatterns = [
         ),
         name="cancelled"
     ),
+    path('guest-order/<int:order_id>/<uuid:token>/', views.guest_order_detail, name='guest_order_detail'),
 ]

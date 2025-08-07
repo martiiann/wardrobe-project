@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.contrib.auth.models import User
 from products.models import Product, Size
@@ -30,8 +32,8 @@ class Order(models.Model):
 
     full_name = models.CharField(max_length=100)
     email = models.EmailField()
-    guest_token = models.CharField(
-        max_length=64,
+    guest_token = models.UUIDField(
+        default=uuid.uuid4,
         editable=False,
         null=True,
         blank=True

@@ -18,14 +18,14 @@ import cloudinary
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 🔑 Security
+# 🔐 Security
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
-    config('ALLOWED_HOSTS'),
+    config('ALLOWED_HOSTS', default='wardrobe-project-2025-a1e1d4253e40.herokuapp.com'),
 ]
 
 # 📦 Installed apps
@@ -79,14 +79,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'wardrobe.wsgi.application'
 
-# 🗄 Database - Heroku Postgres
-DATABASES = {
-    'default': dj_database_url.config(
-        default=config('DATABASE_URL'),
-        conn_max_age=600,
-        ssl_require=True
-    )
-}
+# 🗄 Database (Use SQLite locally, Postgres on Heroku)
+if os.getenv('USE_SQLITE', 'True') == 'True':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=config('DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=True
+        )
+    }
 
 # 🔐 Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -114,9 +122,9 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': config('CLOUDINARY_API_SECRET'),
 }
 cloudinary.config( 
-  cloud_name=config('CLOUDINARY_CLOUD_NAME'),
-  api_key=config('CLOUDINARY_API_KEY'),
-  api_secret=config('CLOUDINARY_API_SECRET')
+    cloud_name=config('CLOUDINARY_CLOUD_NAME'),
+    api_key=config('CLOUDINARY_API_KEY'),
+    api_secret=config('CLOUDINARY_API_SECRET')
 )
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 MEDIA_URL = '/media/'
@@ -126,15 +134,16 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STRIPE_PUBLIC_KEY = config("STRIPE_PUBLIC_KEY")
 STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY")
 STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET")
-SITE_URL = f"https://{config('ALLOWED_HOSTS')}"
 
-# 📧 Email settings (Brevo SMTP)
+SITE_URL = f"https://{config('ALLOWED_HOSTS', default='wardrobe-project-2025-a1e1d4253e40.herokuapp.com')}"
+
+# 📧 Email (Brevo SMTP)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp-relay.brevo.com')  # Brevo as default
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp-relay.brevo.com')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '941897001@smtp-brevo.com')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')  # Will use Heroku config var
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'martiyan03817@gmail.com')
 ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'martiyan03817@gmail.com')
 
@@ -148,7 +157,7 @@ CART_SESSION_ID = 'cart'
 CSRF_TRUSTED_ORIGINS = [
     "https://*.stripe.com",
     "https://*.ngrok-free.app",
-    f"https://{config('ALLOWED_HOSTS')}",
+    f"https://{config('ALLOWED_HOSTS', default='wardrobe-project-2025-a1e1d4253e40.herokuapp.com')}",
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
